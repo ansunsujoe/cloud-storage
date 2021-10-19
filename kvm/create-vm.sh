@@ -1,4 +1,8 @@
 #!/bin/bash
+qemu-img create \
+-o preallocation=off \
+-f qcow2 /var/lib/libvirt/images/$1.qcow2 4G
+
 virt-install \
 --virt-type=kvm \
 --name $1 \
