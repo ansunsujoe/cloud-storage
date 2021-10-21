@@ -9,8 +9,9 @@ if __name__ == "__main__":
                "healthcare", "financials", "consumer discretionary", "consumer staples",
                "infotech", "real estate"]
     
-    # Each ticker
-    for i in range(30):
+    # Number of files to generate
+    n_files = 10000
+    for i in range(n_files):
         
         # Starting variables
         cur_price = random.random() * random.randint(5, 3000)
