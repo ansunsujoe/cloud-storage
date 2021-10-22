@@ -19,7 +19,7 @@ if __name__ == "__main__":
         positive_reviews = random.randint(1, reviews)
         avg_volume = random.randint(1000, 5000000)
         
-        data = {
+        data = [{
             "ticker": "".join(random.choices(string.ascii_letters, k=4)).upper(),
             "sector": random.choice(sectors),
             "reviews": {
@@ -28,7 +28,7 @@ if __name__ == "__main__":
                 "negative": reviews - positive_reviews
             },
             "history": [],
-        }
+        }]
         for j in range(20):
             increase_factor = random.random() * 0.05 - 0.02
             data["history"].append({
