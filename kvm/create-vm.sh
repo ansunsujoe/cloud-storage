@@ -1,7 +1,7 @@
 #!/bin/bash
 qemu-img create \
 -o preallocation=off \
--f qcow2 /var/lib/libvirt/images/$1.qcow2 4G
+-f qcow2 /home/kvm/$1.qcow2 $2G
 
 virt-install \
 --virt-type=kvm \
@@ -12,4 +12,4 @@ virt-install \
 --cdrom=/var/lib/libvirt/boot/CentOS-7-x86_64-Minimal-2009.iso \
 --network=bridge=br0,model=virtio \
 --graphics vnc \
---disk path=/var/lib/libvirt/images/centos7.qcow2,bus=virtio,format=qcow2
+--disk path=/home/kvm/$1.qcow2,bus=virtio,format=qcow2
