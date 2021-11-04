@@ -31,7 +31,7 @@ if __name__ == "__main__":
         }]
         for j in range(20):
             increase_factor = random.random() * 0.05 - 0.02
-            data["history"].append({
+            data[0]["history"].append({
                 "time_id": j + 1000,
                 "open": cur_price,
                 "close": cur_price * (1.0 + increase_factor),
