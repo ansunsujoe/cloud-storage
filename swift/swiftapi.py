@@ -3,6 +3,7 @@ from pathlib import Path
 import random
 import string
 import json
+from prettytable import PrettyTable
 
 class StockData():
     def __init__(self):
@@ -115,6 +116,15 @@ class SwiftClient():
     def clear_data(self):
         subprocess.run(["swift", "delete", "-a"])
         print("Data Cleared!")
+        
+    def view_data(self):
+        print("Number of Objects in Storage Nodes:")
+        # Stats logging
+        t = PrettyTable(["Node IP", "Num Objects"])
+        for ip in self.ring_conf.get("storage_nodes"):
+            result = subprocess.run(["ssh", f"root@{ip}", "ls", "/srv/node/sdb/objects", "|", "wc", "-l"], capture_output=True)
+            t.add_row([ip, result])
+        print(str(t))
         
 if __name__ == "__main__":
     client = SwiftClient()
