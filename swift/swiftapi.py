@@ -98,6 +98,11 @@ class SwiftClient():
             self.next_object_num += 1
             if self.next_object_num % self.objects_per_container == 0:
                 self.next_container_num += 1
+                
+    def restart_nodes(self):
+        for ip in self.ring_conf.get("hosts"):
+            subprocess.run(["ssh", f"root@{ip}", "restart-storage.sh"])
+        subprocess.run(["systemctl", "restart", "openstack-swift-proxy.service", "memcached.service"])
 
     def clear():
         subprocess.run(["swift", "delete", "-a"])
@@ -106,3 +111,4 @@ class SwiftClient():
 if __name__ == "__main__":
     client = SwiftClient()
     client.create_ring()
+    client.restart_nodes()
