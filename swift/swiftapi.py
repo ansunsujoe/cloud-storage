@@ -53,7 +53,7 @@ class SwiftClient():
         # Account builder
         account_replicas = self.ring_conf.get("account").get("replicas")
         account_ips = self.ring_conf.get("account").get("hosts")
-        subprocess.run(["swift-ring-builder", "account.builder", "create", "10", account_replicas, "1"])
+        subprocess.run(["swift-ring-builder", "account.builder", "create", "10", str(account_replicas), "1"])
         for ip in account_ips:
             subprocess.run(["swift-ring-builder", "account.builder", "add", "--region", "1", "--zone", "1",
                             "--ip", ip, "--port", "6202", "--device", "sdb", "--weight", "100"])
@@ -62,7 +62,7 @@ class SwiftClient():
         # Container builder
         container_replicas = self.ring_conf.get("container").get("replicas")
         container_ips = self.ring_conf.get("container").get("hosts")
-        subprocess.run(["swift-ring-builder", "container.builder", "create", "10", container_replicas, "1"])
+        subprocess.run(["swift-ring-builder", "container.builder", "create", "10", str(container_replicas), "1"])
         for ip in container_ips:
             subprocess.run(["swift-ring-builder", "container.builder", "add", "--region", "1", "--zone", "1",
                             "--ip", ip, "--port", "6201", "--device", "sdb", "--weight", "100"])
@@ -71,7 +71,7 @@ class SwiftClient():
         # Object builder
         object_replicas = self.ring_conf.get("object").get("replicas")
         object_ips = self.ring_conf.get("object").get("hosts")
-        subprocess.run(["swift-ring-builder", "object.builder", "create", "10", object_replicas, "1"])
+        subprocess.run(["swift-ring-builder", "object.builder", "create", "10", str(object_replicas), "1"])
         for ip in object_ips:
             subprocess.run(["swift-ring-builder", "object.builder", "add", "--region", "1", "--zone", "1",
                             "--ip", ip, "--port", "6200", "--device", "sdb", "--weight", "100"])
