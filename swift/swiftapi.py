@@ -42,9 +42,9 @@ class StockData():
     
 class SwiftClient():
     def __init__(self):
-        self.next_container_num = 1
-        self.next_object_num = 1
-        self.objects_per_container = 1000
+        self.cur_container_num = 1
+        self.cur_object_num = 1
+        self.objects_per_container = 100
         self.generator = StockData()
         with open("config.json", "r") as f:
             self.ring_conf = json.load(f)
@@ -87,17 +87,24 @@ class SwiftClient():
         subprocess.run(["mv", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
 
     def add_data(self, n):
+        # Container path
+        fp = Path(f"container-{self.cur_container_num}")
+        fp.mkdir(parents=True, exist_ok=True)
+        
         for i in range(n):
             # Generate file and upload it
-            with open(f"stock-data-{self.next_object_num}.json", "w") as f:
+            with open(fp / f"stock-data-{self.cur_object_num}.json", "w") as f:
                 f.write(json.dumps(self.generator.generate(), indent=4))
-            subprocess.run(["swift", "upload", f"container-{self.next_container_num}", f"stock-data-{self.next_object_num}.json"])
-            subprocess.run(["rm", f"stock-data-{self.next_object_num}.json"])
             
             # Increment object number and possibly container number
-            self.next_object_num += 1
-            if self.next_object_num % self.objects_per_container == 0:
-                self.next_container_num += 1
+            self.cur_object_num += 1
+            if self.cur_object_num % self.objects_per_container == 0:
+                print(f"Uploading into Container {self.cur_container_num}...")
+                subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
+                subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+                self.cur_container_num += 1
+                fp = Path(f"container-{self.cur_container_num}")
+                fp.mkdir(parents=True, exist_ok=True)
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
