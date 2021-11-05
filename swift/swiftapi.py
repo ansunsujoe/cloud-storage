@@ -101,7 +101,7 @@ class SwiftClient():
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
-            subprocess.run(["ssh", f"root@{ip}", "restart-storage.sh"])
+            subprocess.run(["ssh", f"root@{ip}", "./restart-storage.sh"])
         subprocess.run(["systemctl", "restart", "openstack-swift-proxy.service", "memcached.service"])
 
     def clear():
