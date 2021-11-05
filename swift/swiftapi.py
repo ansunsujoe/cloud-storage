@@ -55,28 +55,31 @@ class SwiftClient():
         # Account builder
         account_replicas = self.ring_conf.get("account").get("replicas")
         account_ips = self.ring_conf.get("account").get("hosts")
+        account_weights = self.ring_conf.get("account").get("weights")
         subprocess.run(["swift-ring-builder", "account.builder", "create", "10", str(account_replicas), "1"])
-        for ip in account_ips:
+        for i in range(len(account_ips)):
             subprocess.run(["swift-ring-builder", "account.builder", "add", "--region", "1", "--zone", "1",
-                            "--ip", ip, "--port", "6202", "--device", "sdb", "--weight", "100"])
+                            "--ip", account_ips[i], "--port", "6202", "--device", "sdb", "--weight", str(account_weights[i])])
         subprocess.run(["swift-ring-builder", "account.builder", "rebalance"])
         
         # Container builder
         container_replicas = self.ring_conf.get("container").get("replicas")
         container_ips = self.ring_conf.get("container").get("hosts")
+        container_weights = self.ring_conf.get("container").get("weights")
         subprocess.run(["swift-ring-builder", "container.builder", "create", "10", str(container_replicas), "1"])
-        for ip in container_ips:
+        for i in range(len(container_ips)):
             subprocess.run(["swift-ring-builder", "container.builder", "add", "--region", "1", "--zone", "1",
-                            "--ip", ip, "--port", "6201", "--device", "sdb", "--weight", "100"])
+                            "--ip", container_ips[i], "--port", "6201", "--device", "sdb", "--weight", str(container_weights[i])])
         subprocess.run(["swift-ring-builder", "container.builder", "rebalance"])
         
         # Object builder
         object_replicas = self.ring_conf.get("object").get("replicas")
         object_ips = self.ring_conf.get("object").get("hosts")
+        object_weights = self.ring_conf.get("object").get("weights")
         subprocess.run(["swift-ring-builder", "object.builder", "create", "10", str(object_replicas), "1"])
-        for ip in object_ips:
+        for i in range(len(object_ips)):
             subprocess.run(["swift-ring-builder", "object.builder", "add", "--region", "1", "--zone", "1",
-                            "--ip", ip, "--port", "6200", "--device", "sdb", "--weight", "100"])
+                            "--ip", object_ips[i], "--port", "6200", "--device", "sdb", "--weight", str(object_weights[i])])
         subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
         
         # Move gz files to correct place
@@ -107,6 +110,11 @@ class SwiftClient():
                 self.cur_container_num += 1
                 fp = Path(f"container-{self.cur_container_num}")
                 fp.mkdir(parents=True, exist_ok=True)
+                
+        # Data from last container
+        print(f"Uploading into Container {self.cur_container_num}...")
+        subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
+        subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
