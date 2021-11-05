@@ -102,3 +102,7 @@ class SwiftClient():
     def clear():
         subprocess.run(["swift", "delete", "-a"])
         print("Data Cleared!")
+        
+if __name__ == "__main__":
+    client = SwiftClient()
+    client.create_ring()
