@@ -10,7 +10,7 @@ class StockData():
                "healthcare", "financials", "consumer discretionary", "consumer staples",
                "infotech", "real estate"]
         
-    def generate(self):
+    def generate(self, oid):
         # Starting variables
         cur_price = random.random() * random.randint(5, 3000)
         reviews = random.randint(5, 1000)
@@ -18,6 +18,7 @@ class StockData():
         avg_volume = random.randint(1000, 5000000)
         
         data = [{
+            "oid": oid,
             "ticker": "".join(random.choices(string.ascii_letters, k=4)).upper(),
             "sector": random.choice(self.sectors),
             "reviews": {
@@ -94,7 +95,7 @@ class SwiftClient():
         for i in range(n):
             # Generate file and upload it
             with open(fp / f"stock-data-{self.cur_object_num}.json", "w") as f:
-                f.write(json.dumps(self.generator.generate(), indent=4))
+                f.write(json.dumps(self.generator.generate(oid=self.cur_object_num), indent=4))
             
             # Increment object number and possibly container number
             self.cur_object_num += 1
