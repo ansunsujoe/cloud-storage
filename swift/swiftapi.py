@@ -111,7 +111,7 @@ class SwiftClient():
             subprocess.run(["ssh", f"root@{ip}", "./restart-storage.sh"])
         subprocess.run(["systemctl", "restart", "openstack-swift-proxy.service", "memcached.service"])
 
-    def clear_data():
+    def clear_data(self):
         subprocess.run(["swift", "delete", "-a"])
         print("Data Cleared!")
         
