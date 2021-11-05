@@ -130,7 +130,7 @@ class SwiftClient():
         # Stats logging
         t = PrettyTable(["Node IP", "Num Objects"])
         for ip in self.ring_conf.get("storage_nodes"):
-            result = subprocess.check_output(["ssh", f"root@{ip}", "'ls /srv/node/sdb/objects | wc -l'"], universal_newlines=True, shell=True)
+            result = subprocess.check_output(["ssh", f"root@{ip}", "./metrics.sh"], universal_newlines=True, shell=True)
             t.add_row([ip, result])
         print(str(t))
         
