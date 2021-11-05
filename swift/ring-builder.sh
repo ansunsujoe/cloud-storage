@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Account builder
 swift-ring-builder account.builder create 10 1 1
 swift-ring-builder account.builder \
