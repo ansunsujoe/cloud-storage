@@ -125,12 +125,12 @@ class SwiftClient():
         subprocess.run(["swift", "delete", "-a"])
         print("Data Cleared!")
         
-    def view_data(self):
+    def datacount(self):
         print("Number of Objects in Storage Nodes:")
         # Stats logging
         t = PrettyTable(["Node IP", "Num Objects"])
         for ip in self.ring_conf.get("storage_nodes"):
-            result = subprocess.check_output(["./metrics.sh", "datacount", ip], universal_newlines=True)
+            result = subprocess.check_output(["./metrics.sh", "datacount", ip], universal_newlines=True).strip()
             t.add_row([ip, result])
         print(str(t))
         
