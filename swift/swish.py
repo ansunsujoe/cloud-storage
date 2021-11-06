@@ -12,5 +12,7 @@ while True:
     # Command conditions
     if command == "datacount":
         client.datacount()
-    if command == "restart":
+    elif command == "dataloc":
+        client.dataloc()
+    elif command == "restart":
         client.restart_nodes()

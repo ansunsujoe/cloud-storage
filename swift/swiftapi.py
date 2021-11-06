@@ -131,11 +131,22 @@ class SwiftClient():
         t = PrettyTable(["Node IP", "Num Objects"])
         for ip in self.ring_conf.get("storage_nodes"):
             try:
-                result = subprocess.check_output(["./metrics.sh", "datacount", ip], universal_newlines=True, timeout=3).strip()
+                result = subprocess.check_output(["./metrics.sh", "datacount", ip], universal_newlines=True, timeout=3, 
+                                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).strip()
                 t.add_row([ip, result])
             except Exception:
                 t.add_row([ip, 0])
         print(str(t))
+        
+    def dataloc(self):
+        for ip in self.ring_conf.get("storage_nodes"):
+            try:
+                result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3, 
+                                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).strip()
+                data_ids = [item.split(":")[1] for item in result.split("\n")]
+                print(data_ids)
+            except Exception:
+                pass
         
 if __name__ == "__main__":
     client = SwiftClient()
