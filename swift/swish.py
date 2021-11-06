@@ -11,6 +11,6 @@ while True:
 
     # Command conditions
     if command == "datacount":
-        client.view_data()
+        client.datacount()
     if command == "restart":
         client.restart_nodes()
