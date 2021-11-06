@@ -140,13 +140,20 @@ class SwiftClient():
         
     def dataloc(self):
         for ip in self.ring_conf.get("storage_nodes"):
-            try:
-                result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3, 
+            # try:
+            #     result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3, 
+            #                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).strip()
+            #     print(result)
+            #     data_ids = [item.split(":")[1] for item in result.split("\n")]
+            #     print(data_ids)
+            # except Exception:
+            #     pass
+            
+            result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3, 
                                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).strip()
-                data_ids = [item.split(":")[1] for item in result.split("\n")]
-                print(data_ids)
-            except Exception:
-                pass
+            print(result)
+            data_ids = [item.split(":")[1] for item in result.split("\n")]
+            print(data_ids)
         
 if __name__ == "__main__":
     client = SwiftClient()
