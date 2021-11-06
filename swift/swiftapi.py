@@ -149,10 +149,12 @@ class SwiftClient():
             # except Exception:
             #     pass
             
-            result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3).strip()
-            print(result)
-            data_ids = [item.split(":")[1] for item in result.split("\n")]
-            print(data_ids)
+            try:
+                result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3).strip()
+                data_ids = [int(item.split(":")[1].strip()[:-1]) for item in result.split("\n")]
+                print(data_ids)
+            except Exception:
+                print([])
         
 if __name__ == "__main__":
     client = SwiftClient()
