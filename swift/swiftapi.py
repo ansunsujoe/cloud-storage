@@ -139,22 +139,19 @@ class SwiftClient():
         print(str(t))
         
     def dataloc(self):
+        t = PrettyTable(["OID", "Storage IP"])
+        location_dict = {}
         for ip in self.ring_conf.get("storage_nodes"):
-            # try:
-            #     result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3, 
-            #                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).strip()
-            #     print(result)
-            #     data_ids = [item.split(":")[1] for item in result.split("\n")]
-            #     print(data_ids)
-            # except Exception:
-            #     pass
-            
             try:
                 result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3).strip()
                 data_ids = [int(item.split(":")[1].strip()[:-1]) for item in result.split("\n")]
-                print(data_ids)
+                for oid in data_ids:
+                    location_dict[oid] = ip
             except Exception:
-                print([])
+                pass
+        for key in sorted(location_dict):
+            t.add_row([key, location_dict[key]])
+        print(str(t))
         
 if __name__ == "__main__":
     client = SwiftClient()
