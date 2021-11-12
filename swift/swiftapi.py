@@ -4,6 +4,7 @@ import random
 import string
 import json
 from prettytable import PrettyTable
+from datetime import datetime
 
 class StockData():
     def __init__(self):
@@ -92,6 +93,9 @@ class SwiftClient():
         subprocess.run(["mv", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
 
     def add_data(self, n):
+        # Get current time
+        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " CST"
+        
         # Container path
         fp = Path(f"container-{self.cur_container_num}")
         fp.mkdir(parents=True, exist_ok=True)
@@ -115,6 +119,9 @@ class SwiftClient():
         print(f"Uploading into Container {self.cur_container_num}...")
         subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
         subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+        
+        # Get request logs
+        
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):

@@ -1,5 +1,5 @@
 from swiftapi import SwiftClient
-import time
+from datetime import datetime
 
 # Initialization of client
 client = SwiftClient()
@@ -16,3 +16,7 @@ while True:
         client.dataloc()
     elif command == "restart":
         client.restart_nodes()
+    elif command == "clear-data":
+        client.clear_data()
+    elif command.startswith("add-data"):
+        client.add_data(int(command.split()[1]))
