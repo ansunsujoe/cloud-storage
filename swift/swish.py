@@ -22,3 +22,5 @@ while True:
         client.add_data(int(command.split()[1]))
     elif command.startswith("data-movement"):
         client.get_data_movement_logs(command.split()[1])
+    elif command == "exit":
+        break
