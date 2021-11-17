@@ -49,7 +49,7 @@ class SwiftClient():
         self.cur_object_num = 1
         self.objects_per_container = 100
         self.generator = StockData()
-        self.last_add_data_time = None
+        self.last_event_time = None
         with open("config.json", "r") as f:
             self.ring_conf = json.load(f)
 
@@ -95,7 +95,7 @@ class SwiftClient():
 
     def add_data(self, n):
         # Get current time
-        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " CST"
+        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_add_data_time = start_time
         
         # Container path
@@ -123,16 +123,23 @@ class SwiftClient():
         subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
     
     def get_data_movement_logs(self):
-        try:
-            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_add_data_time], 
-                                             universal_newlines=True, 
-                                             timeout=3, 
-                                             stderr=subprocess.DEVNULL).strip()
-            array = result.split("\n")
-            print(array)
-            print(len(array))
-        except Exception:
-            pass
+        # Collect logs since an event
+        if self.last_event_time is None:
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy"], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip()
+        else:
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_event_time], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip()
+        
+        # Parse the results
+        array = [entry for entry in result.split("\n") if "PUT /v1" in entry]
+        print(array)
+        print(len(array))
+        print(self.last_add_data_time)
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
