@@ -49,6 +49,7 @@ class SwiftClient():
         self.cur_object_num = 1
         self.objects_per_container = 100
         self.generator = StockData()
+        self.last_add_data_time = None
         with open("config.json", "r") as f:
             self.ring_conf = json.load(f)
 
@@ -95,6 +96,7 @@ class SwiftClient():
     def add_data(self, n):
         # Get current time
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " CST"
+        self.last_add_data_time = start_time
         
         # Container path
         fp = Path(f"container-{self.cur_container_num}")
@@ -119,9 +121,15 @@ class SwiftClient():
         print(f"Uploading into Container {self.cur_container_num}...")
         subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
         subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
-        
-        # Get request logs
-        
+    
+    def get_data_movement_logs(self):
+        for ip in self.ring_conf.get("storage_nodes"):
+            try:
+                result = subprocess.check_output(["./metrics.sh", "object-requests", ip], universal_newlines=True, 
+                                                 timeout=3, stderr=subprocess.DEVNULL).strip()
+                print(result)
+            except Exception:
+                pass
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
