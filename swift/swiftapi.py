@@ -124,11 +124,11 @@ class SwiftClient():
     
     def get_data_movement_logs(self):
         try:
-            # result = subprocess.check_output(["./metrics.sh", "object-requests", ip, service], universal_newlines=True, 
-            #                                  timeout=3, stderr=subprocess.DEVNULL).strip()
             result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy"], universal_newlines=True, 
                                                 timeout=3, stderr=subprocess.DEVNULL).strip()
-            print(result)
+            array = result.split("\n")
+            print(array)
+            print(len(array))
         except Exception:
             pass
                 
