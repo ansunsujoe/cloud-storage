@@ -126,7 +126,7 @@ class SwiftClient():
         try:
             # result = subprocess.check_output(["./metrics.sh", "object-requests", ip, service], universal_newlines=True, 
             #                                  timeout=3, stderr=subprocess.DEVNULL).strip()
-            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "|", "grep", "proxy-server"], universal_newlines=True, 
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy"], universal_newlines=True, 
                                                 timeout=3, stderr=subprocess.DEVNULL).strip()
             print(result)
         except Exception:
