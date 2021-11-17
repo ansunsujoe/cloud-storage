@@ -136,10 +136,9 @@ class SwiftClient():
                                                 stderr=subprocess.DEVNULL).strip()
         
         # Parse the results
-        array = [entry for entry in result.split("\n") if "PUT /v1" in entry]
-        print(array)
+        array = [entry for entry in result.split("\n")]
+        print(array[0])
         print(len(array))
-        print(self.last_add_data_time)
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
