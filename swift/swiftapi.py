@@ -124,8 +124,10 @@ class SwiftClient():
     
     def get_data_movement_logs(self):
         try:
-            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy"], universal_newlines=True, 
-                                                timeout=3, stderr=subprocess.DEVNULL).strip()
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_add_data_time], 
+                                             universal_newlines=True, 
+                                             timeout=3, 
+                                             stderr=subprocess.DEVNULL).strip()
             array = result.split("\n")
             print(array)
             print(len(array))
