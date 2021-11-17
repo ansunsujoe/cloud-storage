@@ -122,10 +122,10 @@ class SwiftClient():
         subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
         subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
     
-    def get_data_movement_logs(self):
+    def get_data_movement_logs(self, service):
         for ip in self.ring_conf.get("storage_nodes"):
             try:
-                result = subprocess.check_output(["./metrics.sh", "object-requests", ip], universal_newlines=True, 
+                result = subprocess.check_output(["./metrics.sh", "object-requests", ip, service], universal_newlines=True, 
                                                  timeout=3, stderr=subprocess.DEVNULL).strip()
                 print(result)
             except Exception:
