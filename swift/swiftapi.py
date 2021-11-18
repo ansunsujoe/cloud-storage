@@ -56,7 +56,7 @@ class SwiftClient():
             self.ring_conf = json.load(f)
             
         # Open VM config file
-        with open("vmconfig.json", "r") as f:
+        with open("../vmconfig.json", "r") as f:
             self.vm_names = json.load(f)
 
     def create_ring(self):
