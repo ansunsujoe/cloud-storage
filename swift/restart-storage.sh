@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Rsyncd service
+systemctl enable rsyncd.service
+systemctl restart rsyncd.service
+
 # Account services
 systemctl restart openstack-swift-account.service openstack-swift-account-auditor.service \
   openstack-swift-account-reaper.service openstack-swift-account-replicator.service

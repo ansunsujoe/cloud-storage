@@ -22,5 +22,7 @@ while True:
         client.add_data(int(command.split()[1]))
     elif command == "data-movement":
         client.get_data_movement_logs()
+    elif command == "shutdown":
+        client.shutdown_nodes()
     elif command == "exit":
         break

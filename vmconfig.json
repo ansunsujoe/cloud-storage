@@ -1,0 +1,15 @@
+{
+    "cluster_nodes": [
+        "192.168.1.71",
+        "192.168.1.72",
+        "192.168.1.73"
+    ],
+    "swift": [
+        "swift-object-1",
+        "swift-object-2",
+        "swift-object-3",
+        "swift-object-4",
+        "swift-object-5",
+        "swift-object-6"
+    ]
+}

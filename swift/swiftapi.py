@@ -50,8 +50,14 @@ class SwiftClient():
         self.objects_per_container = 100
         self.generator = StockData()
         self.last_event_time = None
-        with open("config.json", "r") as f:
+        
+        # Open Swift config file
+        with open("swiftconfig.json", "r") as f:
             self.ring_conf = json.load(f)
+            
+        # Open VM config file
+        with open("vmconfig.json", "r") as f:
+            self.vm_names = json.load(f)
 
     def create_ring(self):
         # Account builder
@@ -145,6 +151,17 @@ class SwiftClient():
         for ip in self.ring_conf.get("storage_nodes"):
             subprocess.run(["ssh", f"root@{ip}", "./restart-storage.sh"])
         subprocess.run(["systemctl", "restart", "openstack-swift-proxy.service", "memcached.service"])
+        
+    def shutdown_nodes(self):
+        for ip in self.vm_names.get("cluster_nodes"):
+            result = subprocess.check_output(["./stats.sh", "virsh-nodes", ip], 
+                                                    universal_newlines=True, 
+                                                    timeout=3, 
+                                                    stderr=subprocess.DEVNULL).strip()
+            print(result)
+    
+    def startup_nodes(self):
+        pass
 
     def clear_data(self):
         subprocess.run(["swift", "delete", "-a"])
@@ -156,7 +173,7 @@ class SwiftClient():
         t = PrettyTable(["Node IP", "Num Objects"])
         for ip in self.ring_conf.get("storage_nodes"):
             try:
-                result = subprocess.check_output(["./metrics.sh", "datacount", ip], universal_newlines=True, 
+                result = subprocess.check_output(["./stats.sh", "datacount", ip], universal_newlines=True, 
                                                  timeout=3, stderr=subprocess.DEVNULL).strip()
                 t.add_row([ip, result])
             except Exception:
@@ -168,7 +185,7 @@ class SwiftClient():
         location_dict = {}
         for ip in self.ring_conf.get("storage_nodes"):
             try:
-                result = subprocess.check_output(["./metrics.sh", "dataloc", ip], universal_newlines=True, timeout=3).strip()
+                result = subprocess.check_output(["./stats.sh", "dataloc", ip], universal_newlines=True, timeout=3).strip()
                 data_ids = [int(item.split(":")[1].strip()[:-1]) for item in result.split("\n")]
                 for oid in data_ids:
                     location_dict[oid] = ip
