@@ -137,8 +137,9 @@ class SwiftClient():
         
         # Parse the results
         array = [entry for entry in result.split("\n")]
-        print(array[0])
-        print(len(array))
+        for entry in array:
+            print(entry)
+            print()
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
