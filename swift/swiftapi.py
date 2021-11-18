@@ -144,7 +144,10 @@ class SwiftClient():
         # Parse the results
         array = [entry for entry in result.split("\n")]
         for entry in array:
-            print(entry)
+            if "PUT /v1" in entry:
+                print(entry)
+            elif "GET /v1" in entry:
+                print(entry)
             print()
                 
     def restart_nodes(self):
@@ -161,7 +164,8 @@ class SwiftClient():
             node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             for name in node_names:
                 if name in self.vm_names.get("swift"):
-                    subprocess.run(["./stats.sh", "virsh-shutdown", ip, name])
+                    subprocess.run(["./stats.sh", "virsh-shutdown", ip, name],
+                                   stdout=subprocess.DEVNULL)
     
     def startup_nodes(self):
         for ip in self.vm_names.get("cluster_nodes"):
@@ -172,7 +176,8 @@ class SwiftClient():
             node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             for name in node_names:
                 if name in self.vm_names.get("swift"):
-                    subprocess.run(["./stats.sh", "virsh-startup", ip, name])
+                    subprocess.run(["./stats.sh", "virsh-startup", ip, name],
+                                   stdout=subprocess.DEVNULL)
 
     def clear_data(self):
         subprocess.run(["swift", "delete", "-a"])
