@@ -149,7 +149,7 @@ class SwiftClient():
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
-            subprocess.run(["ssh", f"root@{ip}", "./scripts/restart-storage.sh"])
+            subprocess.run(["ssh", f"root@{ip}", "./restart-storage.sh"])
         subprocess.run(["systemctl", "restart", "openstack-swift-proxy.service", "memcached.service"])
         
     def shutdown_nodes(self):
@@ -161,7 +161,7 @@ class SwiftClient():
             node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             for name in node_names:
                 if name in self.vm_names.get("swift"):
-                    subprocess.run(["ssh", f"generic@{ip}", "./scripts/shutdown-vm.sh", name])
+                    subprocess.run(["ssh", f"generic@{ip}", "./shutdown-vm.sh", name])
     
     def startup_nodes(self):
         pass
