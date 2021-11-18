@@ -158,7 +158,7 @@ class SwiftClient():
                                                     universal_newlines=True, 
                                                     timeout=3, 
                                                     stderr=subprocess.DEVNULL).strip()
-            print(result)
+            print([entry.split()[1] for entry in result.split("\n")[2:]])
     
     def startup_nodes(self):
         pass
