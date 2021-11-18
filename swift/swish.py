@@ -24,5 +24,7 @@ while True:
         client.get_data_movement_logs()
     elif command == "shutdown":
         client.shutdown_nodes()
+    elif command == "startup":
+        client.startup_nodes()
     elif command == "exit":
         break

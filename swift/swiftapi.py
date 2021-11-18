@@ -154,6 +154,17 @@ class SwiftClient():
         
     def shutdown_nodes(self):
         for ip in self.vm_names.get("cluster_nodes"):
+            result = subprocess.check_output(["./stats.sh", "virsh-running-nodes", ip], 
+                                                    universal_newlines=True, 
+                                                    timeout=3, 
+                                                    stderr=subprocess.DEVNULL).strip()
+            node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
+            for name in node_names:
+                if name in self.vm_names.get("swift"):
+                    subprocess.run(["./stats.sh", "virsh-shutdown", ip, name])
+    
+    def startup_nodes(self):
+        for ip in self.vm_names.get("cluster_nodes"):
             result = subprocess.check_output(["./stats.sh", "virsh-nodes", ip], 
                                                     universal_newlines=True, 
                                                     timeout=3, 
@@ -161,10 +172,7 @@ class SwiftClient():
             node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             for name in node_names:
                 if name in self.vm_names.get("swift"):
-                    subprocess.run(["ssh", f"generic@{ip}", f"./shutdown-vm.sh {name}"])
-    
-    def startup_nodes(self):
-        pass
+                    subprocess.run(["./stats.sh", "virsh-startup", ip, name])
 
     def clear_data(self):
         subprocess.run(["swift", "delete", "-a"])
