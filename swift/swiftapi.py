@@ -161,7 +161,7 @@ class SwiftClient():
             node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             for name in node_names:
                 if name in self.vm_names.get("swift"):
-                    subprocess.run(["ssh", f"generic@{ip}", "./shutdown-vm.sh", name])
+                    subprocess.run(["ssh", f"generic@{ip}", f"./shutdown-vm.sh {name}"])
     
     def startup_nodes(self):
         pass
