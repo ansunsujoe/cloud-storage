@@ -173,7 +173,7 @@ class SwiftClient():
                 object_url = request_array[9].split("/")[-1]
                 object_size = request_array[15]
                 print(object_size)
-                total_bytes += object_size
+                # total_bytes += object_size
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
         
         # Calculate high level stats
