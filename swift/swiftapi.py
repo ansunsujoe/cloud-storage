@@ -142,7 +142,7 @@ class SwiftClient():
         
         for i in range(n):
             # Increment object number and possibly container number
-            subprocess.run(["cp", f"container-data/stock-data-{i}.json", "container-data-temp"])
+            subprocess.run(["cp", f"container-data/stock-data-{i+1}.json", "container-data-temp"])
         
         subprocess.run(["swift", "upload", "container-1", "container-data-temp"])
         subprocess.run(["rm", "-rf", "container-data-temp"])
