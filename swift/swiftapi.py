@@ -150,8 +150,8 @@ class SwiftClient():
             if "PUT /v1" in entry:
                 request_array = entry.split()
                 ts = request_array[2]
-                object_url = request_array[9]
-                object_size = request_array[15].split("/")[5]
+                object_url = request_array[9].split("/")[5]
+                object_size = request_array[15]
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
             elif "GET /v1" in entry:
                 print(entry)
