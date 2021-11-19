@@ -175,7 +175,7 @@ class SwiftClient():
         # Calculate high level stats
         dt = datetime.now()
         time_array = last_ts.split(":")
-        datetime(dt.year, dt.month, dt.day, time_array[0], time_array[1], time_array[2])
+        datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
     
     def get_data_movement_logs(self):
         # Collect logs since an event
