@@ -20,6 +20,8 @@ while True:
         client.clear_data()
     elif command.startswith("add-data"):
         client.add_data(int(command.split()[1]))
+    elif command.startswith("generate-data"):
+        client.add_data_container(int(command.split()[1]))
     elif command == "data-movement":
         client.get_data_movement_stats()
     elif command == "data-movement-logs":
