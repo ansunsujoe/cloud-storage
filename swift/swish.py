@@ -18,6 +18,8 @@ while True:
         client.restart_nodes()
     elif command == "clear-data":
         client.clear_data()
+    elif command == "force-clear-data":
+        client.force_clear_data()
     elif command.startswith("add-data"):
         client.add_data(int(command.split()[1]))
     elif command.startswith("generate-data"):

@@ -239,6 +239,14 @@ class SwiftClient():
         subprocess.run(["swift", "delete", "-a"])
         print("Data Cleared!")
         
+    def force_clear_data(self):
+        for ip in self.ring_conf.get("storage_nodes"):
+            try:
+                subprocess.run(["./stats.sh", "data-delete", ip],
+                                        stdout=subprocess.DEVNULL, timeout=3)
+            except Exception:
+                pass
+        
     def datacount(self):
         print("Number of Objects in Storage Nodes:")
         # Stats logging
