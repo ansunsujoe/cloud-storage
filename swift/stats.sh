@@ -10,7 +10,7 @@ elif [ "$1" == "object-requests" ]; then
     if [ "$4" == "None" ]; then
         ssh root@$2 "journalctl -u openstack-swift-object | grep $3"
     else
-        ssh root@$2 "journalctl -u openstack-swift-object --since $4 | grep $3"
+        ssh root@$2 "journalctl -u openstack-swift-object --since \'$4\' | grep $3"
     fi
 elif [ "$1" == "virsh-running-nodes" ]; then
     ssh generic@$2 "sudo virsh list"
