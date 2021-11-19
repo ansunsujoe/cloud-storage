@@ -171,9 +171,10 @@ class SwiftClient():
                 ts = request_array[2]
                 last_ts = ts
                 object_url = request_array[9].split("/")[-1]
-                object_size = request_array[15]
-                print(object_size)
-                # total_bytes += object_size
+                if not object_url.startswith("stock-data"):
+                    continue
+                object_size = int(request_array[15])
+                total_bytes += object_size
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
         
         # Calculate high level stats
@@ -184,6 +185,7 @@ class SwiftClient():
         
         # Metrics
         print(f"Time Elapsed: {delta_sec} seconds")
+        print(f"Total Data Size: {total_bytes / 1024.0} KB")
         print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
     
     def get_data_movement_logs(self):
