@@ -293,8 +293,10 @@ class SwiftClient():
         for i in range(10):
             read_oid = random.randint(1, self.cur_object_num - 1)
             self.req_oids.append(read_oid)
-            subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"])
-            time.sleep(0.2)
+            p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"])
+            p.wait()
+        time.sleep(0.5)
+        self.get_read_req_stats()
         
     def get_read_req_stats(self):
         result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_req_time], 
