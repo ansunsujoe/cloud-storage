@@ -50,6 +50,7 @@ class SwiftClient():
         self.objects_per_container = 1000000
         self.generator = StockData()
         self.last_event_time = None
+        self.last_event_type = None
         
         # Open Swift config file
         with open("swiftconfig.json", "r") as f:
@@ -140,9 +141,10 @@ class SwiftClient():
             # Increment object number and possibly container number
             subprocess.run(["cp", f"container-data/stock-data-{i+1}.json", "container-data-temp"])
             
-        # Get current time
+        # Get current time and set as event time
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_event_time = start_time
+        self.last_event_type = "add-data"
         
         # Upload info into container
         subprocess.run(["swift", "upload", "container-1", "container-data-temp"])
@@ -189,6 +191,17 @@ class SwiftClient():
         print(f"Time Elapsed: {delta_sec} seconds")
         print(f"Total Data Size: {total_bytes / 1024.0} KB")
         print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
+        
+    def get_data_movement_stats_v2(self):
+        for ip in self.ring_conf.get("storage_nodes"):
+            try:
+                result = subprocess.check_output(["./stats.sh", "object-requests", ip, "PUT /v1"], 
+                                                    universal_newlines=True, 
+                                                    timeout=3, 
+                                                    stderr=subprocess.DEVNULL).strip()
+                print(result)
+            except:
+                pass
     
     def get_data_movement_logs(self):
         # Collect logs since an event

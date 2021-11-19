@@ -27,7 +27,7 @@ while True:
     elif command.startswith("generate-data"):
         client.add_data_container(int(command.split()[1]))
     elif command == "data-movement":
-        client.get_data_movement_stats()
+        client.get_data_movement_stats_v2()
     elif command == "data-movement-logs":
         client.get_data_movement_logs()
     elif command == "shutdown":
