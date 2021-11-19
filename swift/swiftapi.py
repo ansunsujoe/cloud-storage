@@ -155,7 +155,6 @@ class SwiftClient():
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
             elif "GET /v1" in entry:
                 print(entry)
-            print()
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
