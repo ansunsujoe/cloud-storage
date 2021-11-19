@@ -105,7 +105,7 @@ class SwiftClient():
     def add_data(self, n):
         # Get current time
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.last_add_data_time = start_time
+        self.last_event_time = start_time
         
         # Container path
         fp = Path(f"container-{self.cur_container_num}")
