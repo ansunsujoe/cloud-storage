@@ -6,6 +6,7 @@ import json
 from prettytable import PrettyTable
 from datetime import datetime
 import re
+import time
 
 class StockData():
     def __init__(self):
@@ -52,6 +53,7 @@ class SwiftClient():
         self.generator = StockData()
         self.last_event_time = None
         self.last_event_type = None
+        self.last_req_time = None
         self.log_fp = Path("data-movement-log.txt")
         
         # Open Swift config file
@@ -285,7 +287,30 @@ class SwiftClient():
         else:
             print(f"No data inserted yet.")
         
-    
+    def get_read_req_stats(self):
+        oids = []
+        self.last_req_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for i in range(10):
+            read_oid = random.randint(1, self.cur_object_num - 1)
+            oids.append(read_oid)
+            subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"])
+            time.sleep(0.2)
+        
+        # Get the results
+        time.sleep(0.5)
+        result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_req_time], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip()
+        get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
+        
+        # Requests
+        for entry in get_requests:
+            request_array = entry.split()
+            object_url = request_array[9].split("/")[-1]
+            response_time = float(request_array[20])
+            print(f"GET Object: {object_url}, Response Time: {response_time}")
+
     def get_data_movement_logs(self):
         with open(self.log_fp, "r") as f:
             data = f.read()
