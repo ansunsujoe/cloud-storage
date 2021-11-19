@@ -7,6 +7,7 @@ from prettytable import PrettyTable
 from datetime import datetime
 import re
 import time
+from tqdm import tqdm
 
 def moving_average(array, interval):
     if len(array) < interval:
@@ -296,7 +297,7 @@ class SwiftClient():
     def generate_read_req(self):
         self.req_oids = []
         self.last_req_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        for i in range(10):
+        for i in tqdm(range(10)):
             read_oid = random.randint(1, self.cur_object_num - 1)
             self.req_oids.append(read_oid)
             p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"],
@@ -318,7 +319,7 @@ class SwiftClient():
             # object_url = request_array[9].split("/")[-1]
             response_time = float(request_array[20])
             response_times.append(response_time)
-            print(f"GET Request 1 - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
+            print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
 
     def get_data_movement_logs(self):
         with open(self.log_fp, "r") as f:
