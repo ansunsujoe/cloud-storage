@@ -214,6 +214,7 @@ class SwiftClient():
             put_requests += [entry for entry in result.split("\n") if "PUT /v1" in entry]
             
         # Object add range
+        print(put_requests)
         target_oids = set(list(range(self.start_object_num, self.end_object_num)))
         received_oids = set()
         
