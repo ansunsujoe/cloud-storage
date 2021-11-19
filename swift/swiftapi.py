@@ -222,6 +222,10 @@ class SwiftClient():
         for entry in put_requests:
             request_array = entry.split()
             ts = request_array[2]
+            print(request_array[2])
+            print(request_array[9])
+            print(request_array[14])
+            print(request_array[15])
             last_ts = ts
             object_url = request_array[9].split("/")[-1]
             if not object_url.startswith("stock-data"):
