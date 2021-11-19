@@ -233,7 +233,7 @@ class SwiftClient():
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip().split()[4]
             response_time = float(request_array[19])
-            received_oids.append(object_oid)
+            received_oids.add(object_oid)
             if object_oid in target_oids:
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}")
             
