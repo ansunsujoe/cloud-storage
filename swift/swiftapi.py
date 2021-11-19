@@ -107,6 +107,11 @@ class SwiftClient():
         for ip in object_ips:
             subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"])
         subprocess.run(["mv", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
+        
+    def as_timestamp(ts):
+        dt = datetime.now()
+        time_array = ts.split(":")
+        return datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
 
     def add_data_container(self, n):
         # Get current time
@@ -222,25 +227,42 @@ class SwiftClient():
         for entry in put_requests:
             request_array = entry.split()
             ts = request_array[2]
-            last_ts = ts
             object_url = request_array[11][:-1].split("/")[-1]
             if not object_url.startswith("stock-data"):
                 continue
             object_oid = int(re.split("[.-]", object_url)[2])
             # Object size
-            object_size = subprocess.check_output(["ls", "-l", f"container-data/{object_url}"], 
+            object_size = int(subprocess.check_output(["ls", "-l", f"container-data/{object_url}"], 
                                                 universal_newlines=True, 
                                                 timeout=3, 
-                                                stderr=subprocess.DEVNULL).strip().split()[4]
+                                                stderr=subprocess.DEVNULL).strip().split()[4])
             response_time = float(request_array[19])
             received_oids.add(object_oid)
-            print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}")
             if object_oid in target_oids:
+                # Max timestamp
+                time_array = ts.split(":")
+                if last_ts is None or self.as_timestamp(ts) > self.as_timestamp(last_ts):
+                    last_ts = ts
+                total_bytes += object_size
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}")
             
         # Check if we have everything
+        print()
         if target_oids.issubset(received_oids):
-            print("COMPLETE")
+            print("Status: COMPLETE")
+        else:
+            print("Status: INCOMPLETE")
+            
+        # Calculate high level stats
+        end_time = self.as_timestamp(last_ts)
+        start_time = datetime.strptime(self.last_event_time, "%Y-%m-%d %H:%M:%S")
+        delta_sec = (end_time - start_time).total_seconds()
+        
+        # Metrics
+        print(f"Time Elapsed: {delta_sec} seconds")
+        print(f"Total Data Size: {total_bytes / 1024.0} KB")
+        print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
+        
     
     def get_data_movement_logs(self):
         # Collect logs since an event
