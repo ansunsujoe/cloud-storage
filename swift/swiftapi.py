@@ -232,6 +232,10 @@ class SwiftClient():
         # Get stats
         last_ts = None
         total_bytes = 0
+        total_response_time = 0
+        total_requests = 0
+        
+        # Iterate through PUT requests
         for entry in put_requests:
             request_array = entry.split()
             ts = request_array[2]
@@ -248,10 +252,11 @@ class SwiftClient():
             received_oids.add(object_oid)
             if object_oid in target_oids:
                 # Max timestamp
-                time_array = ts.split(":")
                 if last_ts is None or self.as_timestamp(ts) > self.as_timestamp(last_ts):
                     last_ts = ts
                 total_bytes += object_size
+                total_requests += 1
+                total_response_time += response_time
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}")
                 f.write(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}\n")
             
@@ -270,12 +275,15 @@ class SwiftClient():
             delta_sec = (end_time - start_time).total_seconds()
             
             # Metrics
+            print(f"Total Requests Made: {total_requests} requests")
             print(f"Time Elapsed: {delta_sec} seconds")
             print(f"Total Data Size: {total_bytes / 1024.0} KB")
             print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
+            print(f"Average Response Time: {round(total_response_time / total_requests, 3)} s")
         
         # Print that nothing has happened
-        print(f"No data inserted yet.")
+        else:
+            print(f"No data inserted yet.")
         
     
     def get_data_movement_logs(self):
