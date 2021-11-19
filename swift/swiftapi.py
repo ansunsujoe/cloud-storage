@@ -222,21 +222,20 @@ class SwiftClient():
         for entry in put_requests:
             request_array = entry.split()
             ts = request_array[2]
-            print(request_array[2])
-            print(request_array[11])
-            print(request_array[14])
-            print(request_array[15])
-            print(request_array[16])
-            print(request_array[19])
             last_ts = ts
-            object_url = request_array[9].split("/")[-1]
+            object_url = request_array[11][:-1].split("/")[-1]
             if not object_url.startswith("stock-data"):
                 continue
             object_oid = re.split(".|-", object_url)[2]
-            object_size = request_array[15]
+            # Object size
+            object_size = subprocess.check_output(["ls", "-l", "container-data", f"stock-data-{object_oid}.json"], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip().split()[4]
+            response_time = float(request_array[19])
             received_oids.append(object_oid)
             if object_oid in target_oids:
-                print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
+                print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}")
             
         # Check if we have everything
         if target_oids.issubset(received_oids):
