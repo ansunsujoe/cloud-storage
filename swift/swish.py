@@ -26,5 +26,7 @@ while True:
         client.shutdown_nodes()
     elif command == "startup":
         client.startup_nodes()
+    elif command == "":
+        continue
     elif command == "exit":
         break
