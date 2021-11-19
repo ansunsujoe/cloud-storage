@@ -224,6 +224,8 @@ class SwiftClient():
             ts = request_array[2]
             last_ts = ts
             object_url = request_array[11][:-1].split("/")[-1]
+            print(request_array[11])
+            print(object_url)
             if not object_url.startswith("stock-data"):
                 continue
             object_oid = re.split(".|-", object_url)[2]
