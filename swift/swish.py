@@ -16,6 +16,8 @@ while True:
         client.dataloc()
     elif command == "restart":
         client.restart_nodes()
+    elif command == "build-ring":
+        client.create_ring()
     elif command == "clear-data":
         client.clear_data()
     elif command == "force-clear-data":
