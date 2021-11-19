@@ -264,14 +264,18 @@ class SwiftClient():
             print("Status: INCOMPLETE")
             
         # Calculate high level stats
-        end_time = self.as_timestamp(last_ts)
-        start_time = datetime.strptime(self.last_event_time, "%Y-%m-%d %H:%M:%S")
-        delta_sec = (end_time - start_time).total_seconds()
+        if last_ts is not None:
+            end_time = self.as_timestamp(last_ts)
+            start_time = datetime.strptime(self.last_event_time, "%Y-%m-%d %H:%M:%S")
+            delta_sec = (end_time - start_time).total_seconds()
+            
+            # Metrics
+            print(f"Time Elapsed: {delta_sec} seconds")
+            print(f"Total Data Size: {total_bytes / 1024.0} KB")
+            print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
         
-        # Metrics
-        print(f"Time Elapsed: {delta_sec} seconds")
-        print(f"Total Data Size: {total_bytes / 1024.0} KB")
-        print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
+        # Print that nothing has happened
+        print(f"No data inserted yet.")
         
     
     def get_data_movement_logs(self):
