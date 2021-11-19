@@ -52,6 +52,7 @@ class SwiftClient():
         self.generator = StockData()
         self.last_event_time = None
         self.last_event_type = None
+        self.log_fp = Path("data-movement-log.txt")
         
         # Open Swift config file
         with open("swiftconfig.json", "r") as f:
@@ -161,7 +162,7 @@ class SwiftClient():
         self.cur_object_num += n
         
         # Upload info into container
-        subprocess.Popen(["./data-actions.sh", "add"])
+        subprocess.Popen(["./data-actions.sh", "add"], stdout=subprocess.DEVNULL)
         
     def get_data_movement_stats(self):
         # Collect logs since an event
@@ -218,6 +219,10 @@ class SwiftClient():
                 put_requests += [entry for entry in result.split("\n") if "PUT /sdb" in entry]
             except Exception:
                 pass
+        
+        # New write file
+        self.log_fp.unlink(missing_ok=True)
+        f = open(self.log_fp, "a")
             
         # Object add range
         target_oids = set(list(range(self.start_object_num, self.end_object_num)))
@@ -247,9 +252,11 @@ class SwiftClient():
                     last_ts = ts
                 total_bytes += object_size
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}")
+                f.write(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Response Time: {response_time}\n")
             
         # Check if we have everything
         print()
+        f.close()
         if target_oids.issubset(received_oids):
             print("Status: COMPLETE")
         else:
@@ -267,17 +274,9 @@ class SwiftClient():
         
     
     def get_data_movement_logs(self):
-        # Collect logs since an event
-        if self.last_event_time is None:
-            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy"], 
-                                                universal_newlines=True, 
-                                                timeout=3, 
-                                                stderr=subprocess.DEVNULL).strip()
-        else:
-            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_event_time], 
-                                                universal_newlines=True, 
-                                                timeout=3, 
-                                                stderr=subprocess.DEVNULL).strip()
+        with open(self.log_fp, "r") as f:
+            data = f.read()
+            print(data)
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
