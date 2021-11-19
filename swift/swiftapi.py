@@ -206,6 +206,7 @@ class SwiftClient():
         # Make requests to all Storage nodes
         for ip in self.ring_conf.get("storage_nodes"):
             last_event_time = self.last_event_time if self.last_event_time is not None else "None"
+            print(last_event_time)
             result = subprocess.check_output(["./stats.sh", "object-requests", ip, "PUT", last_event_time.split()[1]], 
                                                 universal_newlines=True, 
                                                 timeout=3).strip()
