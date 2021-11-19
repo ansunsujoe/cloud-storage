@@ -5,7 +5,7 @@ if [ "$1" == "dataloc" ]; then
 elif [ "$1" == "datacount" ]; then
     ssh root@$2 'find /srv/node/sdb/objects -name *.data | wc -l'
 elif [ "$1" == "data-delete" ]; then
-    ssh root@$2 'rm -r /srv/node/sdb/objects/*'
+    ssh root@$2 'rm -r /srv/node/sdb/objects/* /srv/node/sdb/containers/* /srv/node/sdb/accounts/*'
 elif [ "$1" == "object-requests" ]; then
     ssh root@$2 "journalctl -u openstack-swift-object | grep $3"
 elif [ "$1" == "virsh-running-nodes" ]; then
