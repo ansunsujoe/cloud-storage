@@ -224,13 +224,11 @@ class SwiftClient():
             ts = request_array[2]
             last_ts = ts
             object_url = request_array[11][:-1].split("/")[-1]
-            print(request_array[11])
-            print(object_url)
             if not object_url.startswith("stock-data"):
                 continue
-            object_oid = re.split(".|-", object_url)[2]
+            object_oid = re.split("[.-]", object_url)[2]
             # Object size
-            object_size = subprocess.check_output(["ls", "-l", "container-data", f"stock-data-{object_oid}.json"], 
+            object_size = subprocess.check_output(["ls", "-l", "container-data", object_url], 
                                                 universal_newlines=True, 
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip().split()[4]
