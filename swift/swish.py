@@ -20,6 +20,8 @@ while True:
         client.create_ring()
     elif command == "clear-data":
         client.clear_data()
+    elif command == "init":
+        client.initconfig()
     elif command == "force-clear-data":
         client.force_clear_data()
     elif command.startswith("add-data"):
