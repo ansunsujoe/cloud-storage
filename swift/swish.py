@@ -33,6 +33,8 @@ while True:
     elif command == "data-movement-logs":
         client.get_data_movement_logs()
     elif command == "read-req":
+        client.generate_read_req()
+    elif command == "read-stats":
         client.get_read_req_stats()
     elif command == "shutdown":
         client.shutdown_nodes()

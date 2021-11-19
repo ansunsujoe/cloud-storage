@@ -287,23 +287,21 @@ class SwiftClient():
         else:
             print(f"No data inserted yet.")
         
-    def get_read_req_stats(self):
-        oids = []
+    def generate_read_req(self):
+        self.req_oids = []
         self.last_req_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         for i in range(10):
             read_oid = random.randint(1, self.cur_object_num - 1)
-            oids.append(read_oid)
+            self.req_oids.append(read_oid)
             subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"])
             time.sleep(0.2)
         
-        # Get the results
-        time.sleep(0.5)
+    def get_read_req_stats(self):
         result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_req_time], 
                                                 universal_newlines=True, 
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip()
         get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
-        
         # Requests
         for entry in get_requests:
             request_array = entry.split()
