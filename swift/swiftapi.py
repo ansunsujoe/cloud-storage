@@ -60,7 +60,7 @@ class SwiftClient():
             self.vm_names = json.load(f)
             
         # Set up Swift Credentials
-        subprocess.run(["source", "keystone_admin_env"])
+        # subprocess.run(["source", "keystone_admin_env"])
 
     def create_ring(self):
         # Account builder
