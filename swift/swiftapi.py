@@ -161,9 +161,7 @@ class SwiftClient():
         self.cur_object_num += n
         
         # Upload info into container
-        add_process = subprocess.Popen(["swift", "upload", "container-1", "container-data-temp"])
-        add_process.wait()
-        subprocess.Popen(["rm", "-rf", "container-data-temp"])
+        subprocess.Popen(["./data-actions.sh", "add"])
         
     def get_data_movement_stats(self):
         # Collect logs since an event
