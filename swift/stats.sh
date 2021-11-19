@@ -7,8 +7,11 @@ elif [ "$1" == "datacount" ]; then
 elif [ "$1" == "data-delete" ]; then
     ssh root@$2 'rm -r /srv/node/sdb/objects/* /srv/node/sdb/containers/* /srv/node/sdb/accounts/*'
 elif [ "$1" == "object-requests" ]; then
-    echo $4
-    ssh root@$2 "journalctl -u openstack-swift-object --since $4 | grep $3"
+    if [ "$4" == "None" ]; then
+        ssh root@$2 "journalctl -u openstack-swift-object | grep $3"
+    else
+        ssh root@$2 "journalctl -u openstack-swift-object --since $4 | grep $3"
+    fi
 elif [ "$1" == "virsh-running-nodes" ]; then
     ssh generic@$2 "sudo virsh list"
 elif [ "$1" == "virsh-shutoff-nodes" ]; then
