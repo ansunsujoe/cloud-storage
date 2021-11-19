@@ -47,7 +47,7 @@ class SwiftClient():
     def __init__(self):
         self.cur_container_num = 1
         self.cur_object_num = 1
-        self.objects_per_container = 100
+        self.objects_per_container = 1000000
         self.generator = StockData()
         self.last_event_time = None
         
@@ -102,7 +102,7 @@ class SwiftClient():
             subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"])
         subprocess.run(["mv", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
 
-    def add_data(self, n):
+    def add_data_container(self, n):
         # Get current time
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_event_time = start_time
@@ -121,7 +121,7 @@ class SwiftClient():
             if self.cur_object_num % self.objects_per_container == 0:
                 print(f"Uploading into Container {self.cur_container_num}...")
                 subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
-                subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+                # subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
                 self.cur_container_num += 1
                 fp = Path(f"container-{self.cur_container_num}")
                 fp.mkdir(parents=True, exist_ok=True)
@@ -129,7 +129,66 @@ class SwiftClient():
         # Data from last container
         print(f"Uploading into Container {self.cur_container_num}...")
         subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
-        subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+        # subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+        
+    def add_data(self, n):
+        # Get current time
+        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.last_event_time = start_time
+        
+        # Container path
+        fp = Path(f"container")
+        fp.mkdir(parents=True, exist_ok=True)
+        
+        # for i in range(n):
+        #     # Generate file and upload it
+        #     with open(fp / f"stock-data-{self.cur_object_num}.json", "w") as f:
+        #         f.write(json.dumps(self.generator.generate(oid=self.cur_object_num), indent=4))
+            
+        #     # Increment object number and possibly container number
+        #     self.cur_object_num += 1
+        #     if self.cur_object_num % self.objects_per_container == 0:
+        #         print(f"Uploading into Container {self.cur_container_num}...")
+        #         subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
+        #         subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+        #         self.cur_container_num += 1
+        #         fp = Path(f"container-{self.cur_container_num}")
+        #         fp.mkdir(parents=True, exist_ok=True)
+                
+        # # Data from last container
+        # print(f"Uploading into Container {self.cur_container_num}...")
+        # subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
+        # # subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+        
+    def get_data_movement_stats(self):
+        # Collect logs since an event
+        if self.last_event_time is None:
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy"], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip()
+        else:
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_event_time], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip()
+        
+        # Parse the results
+        array = [entry for entry in result.split("\n")]
+        last_ts = None
+        for entry in array:
+            if "PUT /v1" in entry:
+                request_array = entry.split()
+                ts = request_array[2]
+                last_ts = ts
+                object_url = request_array[9].split("/")[-1]
+                object_size = request_array[15]
+                print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
+        
+        # Calculate high level stats
+        dt = datetime.now()
+        time_array = last_ts.split(":")
+        datetime(dt.year, dt.month, dt.day, time_array[0], time_array[1], time_array[2])
     
     def get_data_movement_logs(self):
         # Collect logs since an event
@@ -145,16 +204,7 @@ class SwiftClient():
                                                 stderr=subprocess.DEVNULL).strip()
         
         # Parse the results
-        array = [entry for entry in result.split("\n")]
-        for entry in array:
-            if "PUT /v1" in entry:
-                request_array = entry.split()
-                ts = request_array[2]
-                object_url = request_array[9].split("/")[-1]
-                object_size = request_array[15]
-                print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
-            elif "GET /v1" in entry:
-                print(entry)
+        print(result)
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
