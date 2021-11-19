@@ -181,7 +181,8 @@ class SwiftClient():
         dt = datetime.now()
         time_array = last_ts.split(":")
         end_time = datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
-        delta_sec = (end_time - self.last_event_time).total_seconds()
+        start_time = datetime.strptime(self.last_event_time, "%Y-%m-%d %H:%M:%S")
+        delta_sec = (end_time - start_time).total_seconds()
         
         # Metrics
         print(f"Time Elapsed: {delta_sec} seconds")
