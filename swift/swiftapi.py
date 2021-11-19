@@ -194,6 +194,7 @@ class SwiftClient():
         
     def get_data_movement_stats_v2(self):
         for ip in self.ring_conf.get("storage_nodes"):
+            print("hello")
             try:
                 result = subprocess.check_output(["./stats.sh", "object-requests", ip, "PUT /v1", self.last_event_time], 
                                                     universal_newlines=True, 
