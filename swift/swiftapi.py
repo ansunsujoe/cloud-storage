@@ -8,6 +8,12 @@ from datetime import datetime
 import re
 import time
 
+def moving_average(array, interval):
+    if len(array) < interval:
+        return sum(array) / len(array)
+    else:
+        return sum(array[-interval:]) / interval
+
 class StockData():
     def __init__(self):
         self.sectors = ["communication", "energy", "materials", "industrials", "utilities",
@@ -293,7 +299,8 @@ class SwiftClient():
         for i in range(10):
             read_oid = random.randint(1, self.cur_object_num - 1)
             self.req_oids.append(read_oid)
-            p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"])
+            p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"],
+                                 stdout=subprocess.DEVNULL)
             p.wait()
         time.sleep(0.5)
         self.get_read_req_stats()
@@ -304,12 +311,14 @@ class SwiftClient():
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip()
         get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
+        response_times = []
         # Requests
-        for entry in get_requests:
+        for i, entry in enumerate(get_requests):
             request_array = entry.split()
-            object_url = request_array[9].split("/")[-1]
+            # object_url = request_array[9].split("/")[-1]
             response_time = float(request_array[20])
-            print(f"GET Object: {object_url}, Response Time: {response_time}")
+            response_times.append(response_time)
+            print(f"GET Request 1 - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
 
     def get_data_movement_logs(self):
         with open(self.log_fp, "r") as f:
