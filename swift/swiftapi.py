@@ -197,8 +197,7 @@ class SwiftClient():
             try:
                 result = subprocess.check_output(["./stats.sh", "object-requests", ip, "PUT /v1", self.last_event_time], 
                                                     universal_newlines=True, 
-                                                    timeout=3, 
-                                                    stderr=subprocess.DEVNULL).strip()
+                                                    timeout=3).strip()
                 print(result)
             except:
                 pass
