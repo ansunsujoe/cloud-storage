@@ -174,11 +174,7 @@ class SwiftClient():
                 if not object_url.startswith("stock-data"):
                     continue
                 object_size = int(request_array[15])
-                print(request_array[19])
-                print(request_array[20])
-                print(request_array[21])
-                print(request_array[22])
-                print(request_array[23])
+                response_time = float(request_array[20])
                 total_bytes += object_size
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
         
@@ -229,7 +225,7 @@ class SwiftClient():
     
     def startup_nodes(self):
         for ip in self.vm_names.get("cluster_nodes"):
-            result = subprocess.check_output(["./stats.sh", "virsh-nodes", ip], 
+            result = subprocess.check_output(["./stats.sh", "virsh-shutoff-nodes", ip], 
                                                     universal_newlines=True, 
                                                     timeout=3, 
                                                     stderr=subprocess.DEVNULL).strip()
