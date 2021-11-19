@@ -174,10 +174,11 @@ class SwiftClient():
                 if not object_url.startswith("stock-data"):
                     continue
                 object_size = int(request_array[15])
-                print(request_array[16])
-                print(request_array[17])
-                print(request_array[18])
                 print(request_array[19])
+                print(request_array[20])
+                print(request_array[21])
+                print(request_array[22])
+                print(request_array[23])
                 total_bytes += object_size
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
         
