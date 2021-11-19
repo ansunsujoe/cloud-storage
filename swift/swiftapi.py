@@ -108,7 +108,7 @@ class SwiftClient():
             subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"])
         subprocess.run(["mv", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
         
-    def as_timestamp(ts):
+    def as_timestamp(self, ts):
         dt = datetime.now()
         time_array = ts.split(":")
         return datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
