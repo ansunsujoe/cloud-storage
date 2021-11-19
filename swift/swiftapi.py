@@ -223,7 +223,9 @@ class SwiftClient():
             request_array = entry.split()
             ts = request_array[2]
             print(request_array[2])
-            print(request_array[10])
+            print(request_array[11])
+            print(request_array[14])
+            print(request_array[15])
             print(request_array[16])
             print(request_array[19])
             last_ts = ts
