@@ -21,3 +21,6 @@ elif [ "$1" == "virsh-shutdown" ]; then
 elif [ "$1" == "virsh-startup" ]; then
     ssh generic@$2 "sudo virsh start $3"
 fi
+elif [ "$1" == "initconfig" ]; then
+    ssh root@$2 "timedatectl set-timezone America/Chicago"
+fi 

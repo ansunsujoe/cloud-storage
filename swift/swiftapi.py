@@ -5,6 +5,7 @@ import string
 import json
 from prettytable import PrettyTable
 from datetime import datetime
+import re
 
 class StockData():
     def __init__(self):
@@ -62,6 +63,10 @@ class SwiftClient():
             
         # Set up Swift Credentials
         # subprocess.run(["source", "keystone_admin_env"])
+        
+    def initconfig(self):
+        for ip in self.ring_conf.get("storage_nodes"):
+            subprocess.run(["./stats.sh", "initconfig", ip])
 
     def create_ring(self):
         # Account builder
@@ -133,18 +138,22 @@ class SwiftClient():
         # subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
         
     def add_data(self, n):
+        self.start_object_num = self.cur_object_num
+        self.end_object_num = self.cur_object_num + n
+        
         # Container path
         fp = Path(f"container-data-temp")
         fp.mkdir(parents=True, exist_ok=True)
         
-        for i in range(n):
+        for i in range(self.start_object_num, self.end_object_num):
             # Increment object number and possibly container number
-            subprocess.run(["cp", f"container-data/stock-data-{i+1}.json", "container-data-temp"])
+            subprocess.run(["cp", f"container-data/stock-data-{i}.json", "container-data-temp"])
             
         # Get current time and set as event time
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_event_time = start_time
         self.last_event_type = "add-data"
+        self.cur_object_num += n
         
         # Upload info into container
         subprocess.run(["swift", "upload", "container-1", "container-data-temp"])
@@ -193,12 +202,39 @@ class SwiftClient():
         print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
         
     def get_data_movement_stats_v2(self):
+        put_requests = []
+        # Make requests to all Storage nodes
         for ip in self.ring_conf.get("storage_nodes"):
             last_event_time = self.last_event_time if self.last_event_time is not None else "None"
             result = subprocess.check_output(["./stats.sh", "object-requests", ip, "PUT", last_event_time], 
                                                 universal_newlines=True, 
                                                 timeout=3).strip()
-            print(result)
+            # Parse the results
+            put_requests += [entry for entry in result.split("\n") if "PUT /v1" in entry]
+            
+        # Object add range
+        target_oids = set(list(range(self.start_object_num, self.end_object_num)))
+        received_oids = set()
+        
+        # Get stats
+        last_ts = None
+        total_bytes = 0
+        for entry in put_requests:
+            request_array = entry.split()
+            ts = request_array[2]
+            last_ts = ts
+            object_url = request_array[9].split("/")[-1]
+            if not object_url.startswith("stock-data"):
+                continue
+            object_oid = re.split(".|-", object_url)[2]
+            object_size = request_array[15]
+            received_oids.append(object_oid)
+            if object_oid in target_oids:
+                print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
+            
+        # Check if we have everything
+        if target_oids.issubset(received_oids):
+            print("COMPLETE")
     
     def get_data_movement_logs(self):
         # Collect logs since an event
@@ -212,9 +248,6 @@ class SwiftClient():
                                                 universal_newlines=True, 
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip()
-        
-        # Parse the results
-        print(result)
                 
     def restart_nodes(self):
         for ip in self.ring_conf.get("storage_nodes"):
