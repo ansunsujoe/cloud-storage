@@ -221,7 +221,8 @@ class SwiftClient():
                 pass
         
         # New write file
-        self.log_fp.unlink(missing_ok=True)
+        if self.log_fp.exists():
+            self.log_fp.unlink()
         f = open(self.log_fp, "a")
             
         # Object add range
