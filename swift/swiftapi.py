@@ -132,10 +132,6 @@ class SwiftClient():
         # subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
         
     def add_data(self, n):
-        # Get current time
-        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.last_event_time = start_time
-        
         # Container path
         fp = Path(f"container-data-temp")
         fp.mkdir(parents=True, exist_ok=True)
@@ -143,7 +139,12 @@ class SwiftClient():
         for i in range(n):
             # Increment object number and possibly container number
             subprocess.run(["cp", f"container-data/stock-data-{i+1}.json", "container-data-temp"])
+            
+        # Get current time
+        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.last_event_time = start_time
         
+        # Upload info into container
         subprocess.run(["swift", "upload", "container-1", "container-data-temp"])
         subprocess.run(["rm", "-rf", "container-data-temp"])
         
@@ -163,6 +164,7 @@ class SwiftClient():
         # Parse the results
         array = [entry for entry in result.split("\n")]
         last_ts = None
+        total_bytes = 0
         for entry in array:
             if "PUT /v1" in entry:
                 request_array = entry.split()
@@ -170,12 +172,18 @@ class SwiftClient():
                 last_ts = ts
                 object_url = request_array[9].split("/")[-1]
                 object_size = request_array[15]
+                total_bytes += int(object_size)
                 print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}")
         
         # Calculate high level stats
         dt = datetime.now()
         time_array = last_ts.split(":")
-        datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
+        end_time = datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
+        delta_sec = (end_time - self.last_event_time).total_seconds()
+        
+        # Metrics
+        print(f"Time Elapsed: {delta_sec} seconds")
+        print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
     
     def get_data_movement_logs(self):
         # Collect logs since an event
