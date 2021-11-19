@@ -206,16 +206,13 @@ class SwiftClient():
         # Make requests to all Storage nodes
         for ip in self.ring_conf.get("storage_nodes"):
             last_event_time = self.last_event_time if self.last_event_time is not None else "None"
-            print(last_event_time)
             result = subprocess.check_output(["./stats.sh", "object-requests", ip, "PUT", last_event_time], 
                                                 universal_newlines=True, 
                                                 timeout=3).strip()
             # Parse the results
-            print(result)
-            put_requests += [entry for entry in result.split("\n") if "PUT /v1" in entry]
+            put_requests += [entry for entry in result.split("\n") if "PUT /sdb" in entry]
             
         # Object add range
-        print(put_requests)
         target_oids = set(list(range(self.start_object_num, self.end_object_num)))
         received_oids = set()
         
