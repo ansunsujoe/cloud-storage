@@ -211,6 +211,7 @@ class SwiftClient():
                                                 universal_newlines=True, 
                                                 timeout=3).strip()
             # Parse the results
+            print(result)
             put_requests += [entry for entry in result.split("\n") if "PUT /v1" in entry]
             
         # Object add range
