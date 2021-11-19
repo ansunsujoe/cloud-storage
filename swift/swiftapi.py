@@ -58,6 +58,9 @@ class SwiftClient():
         # Open VM config file
         with open("../vmconfig.json", "r") as f:
             self.vm_names = json.load(f)
+            
+        # Set up Swift Credentials
+        subprocess.run(["source", "keystone_admin_env"])
 
     def create_ring(self):
         # Account builder
@@ -145,7 +148,7 @@ class SwiftClient():
         array = [entry for entry in result.split("\n")]
         for entry in array:
             if "PUT /v1" in entry:
-                print(entry)
+                print(entry.split())
             elif "GET /v1" in entry:
                 print(entry)
             print()
