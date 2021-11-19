@@ -137,28 +137,15 @@ class SwiftClient():
         self.last_event_time = start_time
         
         # Container path
-        fp = Path(f"container")
+        fp = Path(f"container-data-temp")
         fp.mkdir(parents=True, exist_ok=True)
         
-        # for i in range(n):
-        #     # Generate file and upload it
-        #     with open(fp / f"stock-data-{self.cur_object_num}.json", "w") as f:
-        #         f.write(json.dumps(self.generator.generate(oid=self.cur_object_num), indent=4))
-            
-        #     # Increment object number and possibly container number
-        #     self.cur_object_num += 1
-        #     if self.cur_object_num % self.objects_per_container == 0:
-        #         print(f"Uploading into Container {self.cur_container_num}...")
-        #         subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
-        #         subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
-        #         self.cur_container_num += 1
-        #         fp = Path(f"container-{self.cur_container_num}")
-        #         fp.mkdir(parents=True, exist_ok=True)
-                
-        # # Data from last container
-        # print(f"Uploading into Container {self.cur_container_num}...")
-        # subprocess.run(["swift", "upload", f"container-{self.cur_container_num}", f"container-{self.cur_container_num}"])
-        # # subprocess.run(["rm", "-rf", f"container-{self.cur_container_num}"])
+        for i in range(n):
+            # Increment object number and possibly container number
+            subprocess.run(["cp", f"container-data/stock-data-{i}.json", "container-data-temp"])
+        
+        subprocess.run(["swift", "upload", "container-1", "container-data-temp"])
+        subprocess.run(["rm", "-rf", "container-data-temp"])
         
     def get_data_movement_stats(self):
         # Collect logs since an event
