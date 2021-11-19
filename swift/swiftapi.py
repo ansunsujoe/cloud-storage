@@ -228,7 +228,7 @@ class SwiftClient():
                 continue
             object_oid = re.split("[.-]", object_url)[2]
             # Object size
-            object_size = subprocess.check_output(["ls", "-l", "container-data", object_url], 
+            object_size = subprocess.check_output(["ls", "-l", f"container-data/{object_url}"], 
                                                 universal_newlines=True, 
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip().split()[4]
