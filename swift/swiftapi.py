@@ -321,6 +321,33 @@ class SwiftClient():
             response_times.append(response_time)
             print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
 
+    # def generate_write_req(self):
+    #     self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
+    #     self.cur_object_num += 10
+    #     self.last_req_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    #     for i in tqdm(range(10)):
+    #         write_oid = self.req_oids[i]
+    #         p = subprocess.Popen(["swift", "upload", "container-1", f"container-data-temp/stock-data-{write_oid}.json"],
+    #                              stdout=subprocess.DEVNULL)
+    #         p.wait()
+    #     time.sleep(0.5)
+    #     self.get_write_req_stats()
+        
+    # def get_write_req_stats(self):
+    #     result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_req_time], 
+    #                                             universal_newlines=True, 
+    #                                             timeout=3, 
+    #                                             stderr=subprocess.DEVNULL).strip()
+    #     get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
+    #     response_times = []
+    #     # Requests
+    #     for i, entry in enumerate(get_requests):
+    #         request_array = entry.split()
+    #         # object_url = request_array[9].split("/")[-1]
+    #         response_time = float(request_array[20])
+    #         response_times.append(response_time)
+    #         print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
+            
     def get_data_movement_logs(self):
         with open(self.log_fp, "r") as f:
             data = f.read()
