@@ -329,6 +329,13 @@ class SwiftClient():
         self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
         self.cur_object_num += 10
         self.last_write_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Copy files to temp
+        for i in range(10):
+            write_oid = self.req_oids[i]
+            subprocess.run(["cp", f"container-data/stock-data-{write_oid}.json", "container-data-temp"])
+        
+        # Write requests
         for i in tqdm(range(10)):
             write_oid = self.req_oids[i]
             p = subprocess.Popen(["swift", "upload", "container-1", f"container-data-temp/stock-data-{write_oid}.json"],
