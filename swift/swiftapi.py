@@ -60,7 +60,11 @@ class SwiftClient():
         self.generator = StockData()
         self.last_event_time = None
         self.last_event_type = None
-        self.last_req_time = None
+        self.last_read_time = None
+        self.last_read_start = None
+        self.last_read_end = None
+        self.last_write_start = None
+        self.last_write_end = None
         self.log_fp = Path("data-movement-log.txt")
         
         # Open Swift config file
@@ -296,7 +300,7 @@ class SwiftClient():
         
     def generate_read_req(self):
         self.req_oids = []
-        self.last_req_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         for i in tqdm(range(10)):
             read_oid = random.randint(1, self.cur_object_num - 1)
             self.req_oids.append(read_oid)
@@ -307,7 +311,7 @@ class SwiftClient():
         self.get_read_req_stats()
         
     def get_read_req_stats(self):
-        result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_req_time], 
+        result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_read_time], 
                                                 universal_newlines=True, 
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip()
@@ -321,33 +325,33 @@ class SwiftClient():
             response_times.append(response_time)
             print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
 
-    # def generate_write_req(self):
-    #     self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
-    #     self.cur_object_num += 10
-    #     self.last_req_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    #     for i in tqdm(range(10)):
-    #         write_oid = self.req_oids[i]
-    #         p = subprocess.Popen(["swift", "upload", "container-1", f"container-data-temp/stock-data-{write_oid}.json"],
-    #                              stdout=subprocess.DEVNULL)
-    #         p.wait()
-    #     time.sleep(0.5)
-    #     self.get_write_req_stats()
+    def generate_write_req(self):
+        self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
+        self.cur_object_num += 10
+        self.last_write_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for i in tqdm(range(10)):
+            write_oid = self.req_oids[i]
+            p = subprocess.Popen(["swift", "upload", "container-1", f"container-data-temp/stock-data-{write_oid}.json"],
+                                 stdout=subprocess.DEVNULL)
+            p.wait()
+        time.sleep(0.5)
+        self.get_write_req_stats()
         
-    # def get_write_req_stats(self):
-    #     result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_req_time], 
-    #                                             universal_newlines=True, 
-    #                                             timeout=3, 
-    #                                             stderr=subprocess.DEVNULL).strip()
-    #     get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
-    #     response_times = []
-    #     # Requests
-    #     for i, entry in enumerate(get_requests):
-    #         request_array = entry.split()
-    #         # object_url = request_array[9].split("/")[-1]
-    #         response_time = float(request_array[20])
-    #         response_times.append(response_time)
-    #         print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
-            
+    def get_write_req_stats(self):
+        result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_write_time], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip()
+        put_requests = [entry for entry in result.split("\n") if "PUT /v1" in entry and "stock-data" in entry]
+        response_times = []
+        # Requests
+        for i, entry in enumerate(put_requests):
+            request_array = entry.split()
+            # object_url = request_array[9].split("/")[-1]
+            response_time = float(request_array[20])
+            response_times.append(response_time)
+            print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
+           
     def get_data_movement_logs(self):
         with open(self.log_fp, "r") as f:
             data = f.read()

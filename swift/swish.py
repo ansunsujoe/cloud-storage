@@ -1,5 +1,4 @@
 from swiftapi import SwiftClient
-from datetime import datetime
 
 # Initialization of client
 client = SwiftClient()
@@ -36,6 +35,10 @@ while True:
         client.generate_read_req()
     elif command == "read-stats":
         client.get_read_req_stats()
+    elif command == "write-req":
+        client.generate_write_req()
+    elif command == "write-stats":
+        client.get_read_write_stats()
     elif command == "shutdown":
         client.shutdown_nodes()
     elif command == "startup":
