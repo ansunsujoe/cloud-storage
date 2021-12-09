@@ -38,7 +38,7 @@ while True:
     elif command == "write-req":
         client.generate_write_req()
     elif command == "write-stats":
-        client.get_read_write_stats()
+        client.get_write_req_stats()
     elif command == "shutdown":
         client.shutdown_nodes()
     elif command == "startup":
