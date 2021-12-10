@@ -76,7 +76,7 @@ class SwiftClient():
             self.vm_names = json.load(f)
             
         # Set up Swift Credentials
-        # subprocess.run(["source", "keystone_admin_env"])
+        subprocess.run(["source", "~/keystone_admin_env"])
         
     def initconfig(self):
         for ip in self.ring_conf.get("storage_nodes"):
@@ -329,6 +329,10 @@ class SwiftClient():
         self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
         self.cur_object_num += 10
         self.last_write_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Container path
+        fp = Path(f"container-data-temp")
+        fp.mkdir(parents=True, exist_ok=True)
         
         # Copy files to temp
         for i in range(10):
