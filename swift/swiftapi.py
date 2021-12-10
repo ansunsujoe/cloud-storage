@@ -9,6 +9,7 @@ import re
 import time
 from tqdm import tqdm
 import os
+from fabric import Connection
 
 def moving_average(array, interval):
     if len(array) < interval:
@@ -83,6 +84,9 @@ class SwiftClient():
         swift_password = input("Enter Password: ")
         os.environ["OS_PASSWORD"] = swift_password
         print("Successful initialization!")
+        
+        # Set up logreader
+        lr = LogReader()
 
     def initconfig(self):
         for ip in self.ring_conf.get("storage_nodes"):
@@ -449,8 +453,23 @@ class SwiftClient():
         for key in sorted(location_dict):
             t.add_row([key, location_dict[key]])
         print(str(t))
+
+    def test(self):
+        self.lr.read()
         
 if __name__ == "__main__":
     client = SwiftClient()
     client.create_ring()
     client.restart_nodes()
+    
+class LogReader():
+    def __init__(self):
+        self.c = Connection(host="192.168.1.99", user="root")
+        self.last_read_time = None
+        
+    def read(self):
+        if self.last_read_time is not None:
+            result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT")
+        else:
+            result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT")
+        print(result)
