@@ -8,6 +8,7 @@ from datetime import datetime
 import re
 import time
 from tqdm import tqdm
+import os
 
 def moving_average(array, interval):
     if len(array) < interval:
@@ -76,11 +77,23 @@ class SwiftClient():
             self.vm_names = json.load(f)
             
         # Set up Swift Credentials
-        subprocess.run(["source", "~/keystone_admin_env"])
+        self.add_auth_variables()
         
+        # Ask for password input
+        swift_password = input("Enter Password: ")
+        os.environ["OS_PASSWORD"] = swift_password
+        print("Successful initialization!")
+
     def initconfig(self):
         for ip in self.ring_conf.get("storage_nodes"):
             subprocess.run(["./stats.sh", "initconfig", ip])
+            
+    def add_auth_variables(self):
+        vars = ["OS_USERNAME", "OS_PROJECT_NAME", "OS_USER_DOMAIN_NAME",
+                "OS_PROJECT_DOMAIN_NAME", "OS_AUTH_URL",
+                "OS_IDENTITY_API_VERSION"]
+        for v in vars:
+            os.environ[v] = self.ring_conf.get("keystone").get(v)
 
     def create_ring(self):
         # Account builder
