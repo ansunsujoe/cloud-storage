@@ -478,6 +478,7 @@ class LogReader:
         put_requests = [entry for entry in result.split("\n") if "PUT /sdb" in entry]
         for entry in put_requests:
             request_array = entry.split()
+            last_time = request_array[0]
             ts = request_array[2]
             object_url = request_array[11][:-1].split("/")[-1]
             if not object_url.startswith("stock-data"):
@@ -489,7 +490,7 @@ class LogReader:
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip().split()[4])
             response_time = float(request_array[19])
-            print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Time: {response_time}")
+            print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Time: {response_time}, {last_time}")
         
         
 class StorageNode:
