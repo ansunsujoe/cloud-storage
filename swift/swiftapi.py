@@ -17,7 +17,7 @@ def moving_average(array, interval):
     else:
         return sum(array[-interval:]) / interval
 
-class StockData():
+class StockData:
     def __init__(self):
         self.sectors = ["communication", "energy", "materials", "industrials", "utilities",
                "healthcare", "financials", "consumer discretionary", "consumer staples",
@@ -54,7 +54,7 @@ class StockData():
         return data
 
     
-class SwiftClient():
+class SwiftClient:
     def __init__(self):
         self.cur_container_num = 1
         self.cur_object_num = 1
@@ -453,6 +453,9 @@ class SwiftClient():
         for key in sorted(location_dict):
             t.add_row([key, location_dict[key]])
         print(str(t))
+        
+    def set_weight():
+        pass
 
     def test(self):
         self.lr.read()
@@ -462,7 +465,7 @@ if __name__ == "__main__":
     client.create_ring()
     client.restart_nodes()
     
-class LogReader():
+class LogReader:
     def __init__(self):
         self.c = Connection(host="192.168.1.99", user="root")
         self.last_read_time = None
@@ -473,3 +476,25 @@ class LogReader():
         else:
             result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT")
         print(result)
+        
+class StorageNode:
+    def __init__(self, ip, weight, status):
+        self.ip = ip
+        self.weight = weight
+        self.status = "Running"
+        
+    def startup(self):
+        pass
+    
+    def shutdown(self):
+        pass
+        
+class StorageCluster:
+    def __init__(self, storage_nodes):
+        self.nodes = storage_nodes
+        
+    def drop_nodes(self, num_nodes):
+        pass
+    
+    def add_nodes(self, num_nodes):
+        pass
