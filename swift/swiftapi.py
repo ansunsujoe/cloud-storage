@@ -93,7 +93,7 @@ class SwiftClient:
         print("Successful initialization!")
         
         # Set up logreader
-        self.lr = LogReader(host="192.168.1.99")
+        self.lr = LogReader(ip="192.168.1.99")
 
     def initconfig(self):
         for ip in self.ring_conf.get("storage_nodes"):
