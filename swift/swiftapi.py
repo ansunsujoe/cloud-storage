@@ -475,7 +475,22 @@ class LogReader:
             result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT")
         else:
             result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT")
-        print(result)
+        put_requests = [entry for entry in result.split("\n") if "PUT /sdb" in entry]
+        for entry in put_requests:
+            request_array = entry.split()
+            ts = request_array[2]
+            object_url = request_array[11][:-1].split("/")[-1]
+            if not object_url.startswith("stock-data"):
+                continue
+            object_oid = int(re.split("[.-]", object_url)[2])
+            # Object size
+            object_size = int(subprocess.check_output(["ls", "-l", f"container-data/{object_url}"], 
+                                                universal_newlines=True, 
+                                                timeout=3, 
+                                                stderr=subprocess.DEVNULL).strip().split()[4])
+            response_time = float(request_array[19])
+            print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Time: {response_time}")
+        
         
 class StorageNode:
     def __init__(self, ip, weight, status):
