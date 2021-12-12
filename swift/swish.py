@@ -47,9 +47,9 @@ while True:
     elif command == "shutdown":
         client.shutdown_nodes()
     elif command.startswith("remove-node"):
-        client.shut_down_node(int(command.split()[1]))
+        client.shut_down_node(command.split()[1])
     elif command.startswith("add-node"):
-        client.start_up_node(int(command.split()[1]))
+        client.start_up_node(command.split()[1])
     elif command == "startup":
         client.startup_nodes()
     elif command == "print-ring":
