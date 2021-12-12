@@ -84,16 +84,13 @@ class SwiftClient:
         for ip in self.ring_conf.get("storage_nodes"):
             self.cluster.add(StorageNode(ip, 100, "running"))
             
-        # Set up Swift Credentials
-        self.add_auth_variables()
+        # # Set up Swift Credentials
+        # self.add_auth_variables()
         
-        # Ask for password input
-        swift_password = input("Enter Password: ")
-        os.environ["OS_PASSWORD"] = swift_password
-        print("Successful initialization!")
-        
-        # Set up logreader
-        self.lr = LogReader(ip="192.168.1.99")
+        # # Ask for password input
+        # swift_password = input("Enter Password: ")
+        # os.environ["OS_PASSWORD"] = swift_password
+        # print("Successful initialization!")
 
     def initconfig(self):
         for ip in self.ring_conf.get("storage_nodes"):
@@ -466,7 +463,7 @@ class SwiftClient:
         pass
 
     def test(self):
-        self.lr.read_puts()
+        self.cluster.nodes[0].lr.read_puts()
         
 if __name__ == "__main__":
     client = SwiftClient()
@@ -493,6 +490,8 @@ class LogReader:
                 time.sleep(1)
                 if empty_requests > patience:
                     break
+            elif not results:
+                time.sleep(1)
             elif results:
                 req_received = True
                 empty_requests = 0
