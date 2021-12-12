@@ -482,9 +482,20 @@ class LogReader:
         self.reqs_in_last_ts = 0
         
     def read_puts(self):
-        for i in range(3):
+        patience = 5
+        empty_requests = 0
+        req_received = False
+        while True:
             print("------")
             results = self.read()
+            if not results and req_received:
+                empty_requests += 1
+                time.sleep(1)
+                if empty_requests > patience:
+                    break
+            elif results:
+                req_received = True
+                empty_requests = 0
             self.process_puts(results)
         
     def read(self):
