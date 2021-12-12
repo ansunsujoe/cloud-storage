@@ -666,6 +666,7 @@ class StorageCluster:
                 subprocess.run(["scp", "/etc/swift/object.ring.gz", f"root@{ip}:/etc/swift"], timeout=3)
             except Exception:
                 pass
+        subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
     
     def __repr__(self):
         # Stats logging
