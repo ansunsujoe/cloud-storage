@@ -489,8 +489,6 @@ class LogReader:
         self.reqs_in_last_ts = 0
         
     def read(self, mode, q):
-        if not self.c.is_connected:
-            return
         patience = 10
         no_req_patience = 25
         no_req_empty_reqs = 0
@@ -665,10 +663,9 @@ class StorageCluster:
         self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         for ip in [node.ip for node in self.nodes]:
             try:
-                subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"], timeout=3)
+                subprocess.run(["scp", "/etc/swift/object.ring.gz", f"root@{ip}:/etc/swift"], timeout=3)
             except Exception:
                 pass
-        subprocess.run(["mv", "object.ring.gz", "/etc/swift"])
     
     def __repr__(self):
         # Stats logging
