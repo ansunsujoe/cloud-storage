@@ -461,6 +461,9 @@ class SwiftClient:
         
     def set_weight(self, ip, weight):
         self.cluster.set_weight(ip, weight)
+        
+    def rebalance(self):
+        self.cluster.rebalance()
 
     def test(self):
         self.cluster.get_put_requests()
@@ -603,8 +606,11 @@ class StorageCluster:
     def set_weight(self, ip, weight):
         for node in self.nodes:
             if node.ip == ip:
-                self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                 node.set_weight(weight)
+                
+    def rebalance(self):
+        self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
     
     def __repr__(self):
         # Stats logging

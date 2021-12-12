@@ -48,6 +48,8 @@ while True:
         client.startup_nodes()
     elif command == "print-ring":
         client.print_cluster_info()
+    elif command == "load-balance":
+        client.rebalance()
     elif command == "test":
         client.test()
     elif command == "":
