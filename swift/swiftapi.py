@@ -91,7 +91,6 @@ class SwiftClient:
         # swift_password = input("Enter Password: ")
         # os.environ["OS_PASSWORD"] = swift_password
         # print("Successful initialization!")
-        self.create_ring()
 
     def initconfig(self):
         for ip in self.ring_conf.get("storage_nodes"):
