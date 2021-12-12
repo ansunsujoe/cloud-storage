@@ -514,7 +514,8 @@ class LogReader:
             if ts == self.last_recorded_ts:
                 self.reqs_in_last_ts += 1
             else:
-                self.reqs_in_last_ts = 0
+                self.reqs_in_last_ts = 1
+                self.last_recorded_ts = ts
             
             # Process/print the request
             print(f"PUT Time: {ts}, Object: {object_oid}, Object Size: {object_size}, Time: {response_time}")
