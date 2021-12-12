@@ -148,7 +148,7 @@ class SwiftClient:
         account_ips = self.ring_conf.get("account").get("hosts")
         subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "create", "2", str(account_replicas), "0"])
         for i in range(len(account_ips)):
-            subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "add", "--region", "1", "--zone", "1",
+            subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "add", "--region", "1", "--zone", f"{i+1}",
                             "--ip", account_ips[i], "--port", "6202", "--device", "sdb", "--weight", "100"])
         subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "rebalance"])
         
@@ -157,7 +157,7 @@ class SwiftClient:
         container_ips = self.ring_conf.get("container").get("hosts")
         subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "create", "2", str(container_replicas), "0"])
         for i in range(len(container_ips)):
-            subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "add", "--region", "1", "--zone", "1",
+            subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "add", "--region", "1", "--zone", f"{i+1}",
                             "--ip", container_ips[i], "--port", "6201", "--device", "sdb", "--weight", "100"])
         subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "rebalance"])
         
@@ -166,7 +166,7 @@ class SwiftClient:
         object_ips = self.ring_conf.get("object").get("hosts")
         subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "create", "2", str(object_replicas), "0"])
         for i in range(len(object_ips)):
-            subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "add", "--region", "1", "--zone", "1",
+            subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "add", "--region", "1", "--zone", f"{i+1}",
                             "--ip", object_ips[i], "--port", "6200", "--device", "sdb", "--weight", "100"])
         subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
         
