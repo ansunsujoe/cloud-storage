@@ -12,6 +12,7 @@ import os
 from fabric import Connection
 import threading
 from queue import Queue
+from copy import deepcopy
 
 vm_mapping = {
     "192.168.1.99": "192.168.1.71",
@@ -390,16 +391,15 @@ class SwiftClient:
             get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
             response_times = []
             # Requests
+            last_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for i, entry in enumerate(get_requests):
                 request_array = entry.split()
-                print(request_array[2])
-                print(request_array[3])
-                print(request_array[1])
+                last_ts = request_array[2]
                 # object_url = request_array[9].split("/")[-1]
                 response_time = float(request_array[20])
                 response_times.append(response_time)
                 print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
-            self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.last_read_time = deepcopy(last_ts)
             time.sleep(3)
             
 
