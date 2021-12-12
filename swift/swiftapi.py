@@ -12,9 +12,6 @@ import os
 from fabric import Connection
 import threading
 from queue import Queue
-import signal
-
-signal.signal(signal.SIGINT, signal.default_int_handler)
 
 def moving_average(array, interval):
     if len(array) < interval:
@@ -594,10 +591,8 @@ class StorageCluster:
         threads = []
         for node in self.nodes:
             threads.append(threading.Thread(target=node.lr.read, args=("PUT",)))
-        try:
             for t in threads:
                 t.start()
-        except KeyboardInterrupt:
             for t in threads:
                 t.join()
     
