@@ -379,7 +379,7 @@ class SwiftClient:
             p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"],
                                  stdout=subprocess.DEVNULL)
             p.wait()
-            time.sleep(0.5)
+            time.sleep(0.2)
         
     def get_read_req_stats(self):
         while True:
@@ -397,6 +397,9 @@ class SwiftClient:
                 response_time = float(request_array[20])
                 response_times.append(response_time)
                 print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
+            time.sleep(3)
+            self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
 
     def generate_write_req(self):
         self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
