@@ -480,11 +480,10 @@ class LogReader:
         self.reqs_in_last_ts = 0
         
     def read_puts(self):
-        patience = 5
+        patience = 10
         empty_requests = 0
         req_received = False
         while True:
-            print("------")
             results = self.read()
             if not results and req_received:
                 empty_requests += 1
