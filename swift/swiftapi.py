@@ -490,6 +490,8 @@ class LogReader:
         
     def read(self, mode, q):
         patience = 10
+        no_req_patience = 25
+        no_req_empty_reqs = 0
         empty_requests = 0
         req_received = False
         while True:
@@ -503,10 +505,14 @@ class LogReader:
                 if empty_requests > patience:
                     break
             elif not results:
+                no_req_empty_reqs += 1
                 time.sleep(1)
+                if no_req_empty_reqs > no_req_patience:
+                    break
             elif results:
                 req_received = True
                 empty_requests = 0
+                no_req_empty_reqs = 0
             if mode == "PUT":
                 self.process_puts(results, q)
             else:
