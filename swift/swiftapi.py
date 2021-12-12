@@ -112,8 +112,6 @@ class SwiftClient:
             for vm in result:
                 try:
                     vm_array = vm.split()
-                    print(vm_array[1])
-                    print(vm_array[2])
                     if vm_array[1] == f"swift-object-{vm_numbers[ip]}":
                         self.cluster.add(StorageNode(f"swift-object-{vm_numbers[ip]}", ip, 100, vm_array[2]))
                         break
