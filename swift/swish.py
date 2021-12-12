@@ -43,6 +43,8 @@ while True:
         client.shutdown_nodes()
     elif command == "startup":
         client.startup_nodes()
+    elif command == "print-ring":
+        client.print_cluster_info()
     elif command == "test":
         client.test()
     elif command == "":

@@ -192,6 +192,7 @@ class SwiftClient:
         # Get current time and set as event time
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.last_event_time = start_time
+        self.cluster.set_event_time(start_time)
         self.last_event_type = "add-data"
         self.cur_object_num += n
         
@@ -458,11 +459,14 @@ class SwiftClient:
             t.add_row([key, location_dict[key]])
         print(str(t))
         
-    def set_weight():
+    def print_cluster_info(self):
+        print(self.cluster)
+        
+    def set_weight(self):
         pass
 
     def test(self):
-        self.lr.read()
+        self.lr.read_puts()
         
 if __name__ == "__main__":
     client = SwiftClient()
@@ -473,6 +477,12 @@ class LogReader:
     def __init__(self, ip):
         self.c = Connection(host=ip, user="root")
         self.last_read_time = None
+        self.q = Queue()
+        
+    def read_puts(self):
+        for i in range(3):
+            results = self.read()
+            self.process_puts(results)
         
     def read(self):
         if self.last_read_time is not None:
@@ -496,6 +506,7 @@ class LogReader:
                                                 stderr=subprocess.DEVNULL).strip().split()[4])
             response_time = float(request_array[19])
             print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Time: {response_time}")
+        self.last_read_time = ts
         
         
 class StorageNode:
@@ -514,6 +525,7 @@ class StorageNode:
 class StorageCluster:
     def __init__(self):
         self.nodes = []
+        self.last_read_time = None
         
     def add(self, node):
         self.nodes.append(node)
@@ -524,13 +536,20 @@ class StorageCluster:
     def restart_nodes(self, num_nodes):
         pass
     
+    def set_event_time(self, t):
+        self.last_read_time = t
+        for node in self.nodes:
+            node.lr.last_read_time = t
+    
     def __repr__(self):
         # Stats logging
-        t = PrettyTable(["Node IP", "Num Objects"])
-        for ip in self.ring_conf.get("storage_nodes"):
-            try:
-                result = subprocess.check_output(["./stats.sh", "datacount", ip], universal_newlines=True, 
-                                                 timeout=3, stderr=subprocess.DEVNULL).strip()
-                t.add_row([ip, result])
-            except Exception:
-                t.add_row([ip, 0])
+        t = PrettyTable(["IP", "Weight", "Status"])
+        for node in self.nodes:
+            t.add_row([node.ip, node.weight, node.status])
+                
+class PutRequest:
+    def __init__(self, ts, oid, size, response_time):
+        self.ts = ts
+        self.oid = oid
+        self.size = size
+        self.response_time = response_time
