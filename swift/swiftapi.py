@@ -489,6 +489,8 @@ class LogReader:
         self.reqs_in_last_ts = 0
         
     def read(self, mode, q):
+        if not self.c.is_connected:
+            return
         patience = 10
         no_req_patience = 25
         no_req_empty_reqs = 0
