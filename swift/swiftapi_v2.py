@@ -363,7 +363,7 @@ class SwiftClient:
         while True:
             read_oid = 1
             self.req_oids.append(read_oid)
-            self.c.run(f"swift download container-1 container-data-temp/stock-data-{read_oid}.json", hide=True)
+            self.c.run(f"swift download container-1 container-data-temp/stock-data-{read_oid}.json --os-auth-url http://controller:500/v3 --os-username admin --os-password CS6343CC", hide=True)
             time.sleep(0.2)
         
     def get_read_req_stats(self):
