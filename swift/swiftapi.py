@@ -393,12 +393,11 @@ class SwiftClient:
             for i, entry in enumerate(get_requests):
                 request_array = entry.split()
                 # object_url = request_array[9].split("/")[-1]
-                print(request_array[0])
                 response_time = float(request_array[20])
                 response_times.append(response_time)
                 print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
-            time.sleep(3)
             self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            time.sleep(3)
             
 
     def generate_write_req(self):
