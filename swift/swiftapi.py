@@ -88,6 +88,7 @@ class SwiftClient:
         self.last_write_start = None
         self.last_write_end = None
         self.log_fp = Path("data-movement-log.txt")
+        self.read_q = Queue()
         
         # VM Connections
         self.cluster_c = {
@@ -359,34 +360,42 @@ class SwiftClient:
             print(f"No data inserted yet.")
             
     def read_req_process(self):
-        pass
+        t1 = threading.Thread(target=self.generate_read_req)
+        t2 = threading.Thread(target=self.get_read_req_stats)
+        try:
+            t1.start()
+            t2.start()
+        except KeyboardInterrupt:
+            t1.join()
+            t2.join()
         
     def generate_read_req(self):
         self.req_oids = []
         self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         while True:
-            read_oid = random.randint(1, self.cur_object_num - 1)
+            read_oid = 1
             self.req_oids.append(read_oid)
             p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"],
                                  stdout=subprocess.DEVNULL)
             p.wait()
             time.sleep(0.5)
-        self.get_read_req_stats()
         
     def get_read_req_stats(self):
-        result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_read_time], 
-                                                universal_newlines=True, 
-                                                timeout=3, 
-                                                stderr=subprocess.DEVNULL).strip()
-        get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
-        response_times = []
-        # Requests
-        for i, entry in enumerate(get_requests):
-            request_array = entry.split()
-            # object_url = request_array[9].split("/")[-1]
-            response_time = float(request_array[20])
-            response_times.append(response_time)
-            print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
+        while True:
+            result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_read_time], 
+                                                    universal_newlines=True, 
+                                                    timeout=3, 
+                                                    stderr=subprocess.DEVNULL).strip()
+            get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
+            response_times = []
+            # Requests
+            for i, entry in enumerate(get_requests):
+                request_array = entry.split()
+                # object_url = request_array[9].split("/")[-1]
+                print(request_array[0])
+                response_time = float(request_array[20])
+                response_times.append(response_time)
+                print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
 
     def generate_write_req(self):
         self.req_oids = range(self.cur_object_num, self.cur_object_num + 10)
@@ -761,7 +770,6 @@ class StorageCluster:
                 subprocess.run(["scp", "/etc/swift/object.ring.gz", f"root@{ip}:/etc/swift"], timeout=3)
             except Exception:
                 pass
-        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
     
     def __repr__(self):
         # Stats logging

@@ -40,6 +40,8 @@ while True:
         client.generate_read_req()
     elif command == "read-stats":
         client.get_read_req_stats()
+    elif command == "reads":
+        client.read_req_process()
     elif command == "write-req":
         client.generate_write_req()
     elif command == "write-stats":
