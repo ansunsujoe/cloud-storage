@@ -115,7 +115,7 @@ class SwiftClient:
                     print(vm_array[1])
                     print(vm_array[2])
                     if vm_array[1] == f"swift-object-{vm_numbers[ip]}":
-                        self.cluster.add(StorageNode(ip, 100, vm_array[2]))
+                        self.cluster.add(StorageNode(f"swift-object-{vm_numbers[ip]}", ip, 100, vm_array[2]))
                         break
                 except Exception:
                     break
@@ -179,7 +179,7 @@ class SwiftClient:
             subprocess.run(["scp", "container.ring.gz", f"root@{ip}:/etc/swift"])
         for ip in object_ips:
             subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"])
-        subprocess.run(["mv", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
+        subprocess.run(["cp", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
         
     def as_timestamp(self, ts):
         dt = datetime.now()
@@ -615,10 +615,11 @@ class LogReader:
         
         
 class StorageNode:
-    def __init__(self, ip, weight, status):
+    def __init__(self, name, ip, weight, status):
+        self.name = name
         self.ip = ip
         self.weight = weight
-        self.status = "Running"
+        self.status = status
         self.lr = LogReader(self.ip)
         
     def startup(self):
@@ -636,12 +637,23 @@ class StorageCluster:
         self.nodes = []
         self.last_read_time = None
         self.q = Queue()
+        # VM Connections
+        self.cluster_c = {
+            "192.168.1.71": Connection(host="192.168.1.71", user="generic"),
+            "192.168.1.72": Connection(host="192.168.1.72", user="generic"),
+            "192.168.1.73": Connection(host="192.168.1.73", user="generic")
+        }
         
     def add(self, node):
         self.nodes.append(node)
         
     def shutdown_nodes(self, num_nodes):
         pass
+    
+    def shut_down_node(self, ip):
+        for node in self.nodes:
+            if node.ip == ip:
+                self.cluster_c[vm_mapping[ip]].sudo(f"virsh shutdown {node.name}")
     
     def restart_stuff(self, num_nodes):
         pass
