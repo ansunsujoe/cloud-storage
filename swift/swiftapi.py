@@ -392,6 +392,7 @@ class SwiftClient:
             # Requests
             for i, entry in enumerate(get_requests):
                 request_array = entry.split()
+                print(request_array[1])
                 # object_url = request_array[9].split("/")[-1]
                 response_time = float(request_array[20])
                 response_times.append(response_time)
