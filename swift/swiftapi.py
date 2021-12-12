@@ -561,7 +561,7 @@ class StorageCluster:
     def shutdown_nodes(self, num_nodes):
         pass
     
-    def restart_nodes(self, num_nodes):
+    def restart_stuff(self, num_nodes):
         pass
     
     def set_event_time(self, t):
