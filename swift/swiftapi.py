@@ -603,7 +603,7 @@ class StorageCluster:
     def set_weight(self, ip, weight):
         for node in self.nodes:
             if node.ip == ip:
-                self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                 node.set_weight(weight)
     
     def __repr__(self):
