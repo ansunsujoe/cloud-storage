@@ -13,6 +13,15 @@ from fabric import Connection
 import threading
 from queue import Queue
 
+vm_mapping = {
+    "192.168.1.99": "192.168.1.71",
+    "192.168.1.98": "192.168.1.71",
+    "192.168.1.97": "192.168.1.72",
+    "192.168.1.96": "192.168.1.72",
+    "192.168.1.95": "192.168.1.73",
+    "192.168.1.94": "192.168.1.73"
+}
+
 def moving_average(array, interval):
     if len(array) < interval:
         return sum(array) / len(array)
@@ -71,6 +80,13 @@ class SwiftClient:
         self.last_write_end = None
         self.log_fp = Path("data-movement-log.txt")
         
+        # VM Connections
+        self.cluster_c = {
+            "192.168.1.71": Connection(host="192.168.1.71", user="root"),
+            "192.168.1.72": Connection(host="192.168.1.72", user="root"),
+            "192.168.1.73": Connection(host="192.168.1.73", user="root")
+        }
+        
         # Open Swift config file
         with open("swiftconfig.json", "r") as f:
             self.ring_conf = json.load(f)
@@ -82,6 +98,7 @@ class SwiftClient:
         # Create the storage nodes and cluster objects
         self.cluster = StorageCluster()
         for ip in self.ring_conf.get("storage_nodes"):
+            print(self.cluster_c[vm_mapping[ip]].sudo("virsh list --all").stdout)
             self.cluster.add(StorageNode(ip, 100, "running"))
             
         # # Set up Swift Credentials
