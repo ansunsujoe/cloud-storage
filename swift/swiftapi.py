@@ -108,15 +108,18 @@ class SwiftClient:
         self.cluster = StorageCluster()
         for ip in self.ring_conf.get("storage_nodes"):
             result = self.cluster_c[vm_mapping[ip]].sudo("virsh list --all", hide=True).stdout
-            x = result.split("\n")
-            print(x[0].split())
-            print(x[1].split())
-            print(x[2].split())
+            result = result.split("\n")[2:]
+            for vm in result:
+                vm_array = vm.split()
+                print(vm_array[1])
+                print(vm_array[2])
+                if vm_array[1] == f"swift-object-{vm_numbers[ip]}":
+                    self.cluster.add(StorageNode(ip, 100, vm_array[2]))
             
             # node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             # for name in node_names:
             #     print(name)
-            self.cluster.add(StorageNode(ip, 100, "running"))
+            
             
         # # Set up Swift Credentials
         # self.add_auth_variables()
