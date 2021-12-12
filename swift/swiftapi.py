@@ -661,8 +661,14 @@ class StorageCluster:
                 node.set_weight(weight)
                 
     def rebalance(self):
-        self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
+        self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        for ip in [node.ip for node in self.nodes]:
+            try:
+                subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"], timeout=3)
+            except Exception:
+                pass
+        subprocess.run(["mv", "object.ring.gz", "/etc/swift"])
     
     def __repr__(self):
         # Stats logging
