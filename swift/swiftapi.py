@@ -82,9 +82,9 @@ class SwiftClient:
         
         # VM Connections
         self.cluster_c = {
-            "192.168.1.71": Connection(host="192.168.1.71", user="root"),
-            "192.168.1.72": Connection(host="192.168.1.72", user="root"),
-            "192.168.1.73": Connection(host="192.168.1.73", user="root")
+            "192.168.1.71": Connection(host="192.168.1.71", user="generic"),
+            "192.168.1.72": Connection(host="192.168.1.72", user="generic"),
+            "192.168.1.73": Connection(host="192.168.1.73", user="generic")
         }
         
         # Open Swift config file
