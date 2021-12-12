@@ -500,7 +500,10 @@ class LogReader:
         
     def read(self):
         if self.last_read_time is not None:
-            result = self.c.run(f"journalctl -u openstack-swift-object --since \"{str(self.last_read_time)}\" | grep PUT", hide=True).stdout
+            try:
+                result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT", hide=True).stdout
+            except Exception:
+                result = []
         else:
             result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT", hide=True).stdout
         return [entry for entry in result.split("\n") if "PUT /sdb" in entry][:-self.reqs_in_last_ts or None]
