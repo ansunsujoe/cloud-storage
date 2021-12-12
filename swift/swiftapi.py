@@ -478,18 +478,21 @@ class LogReader:
         self.c = Connection(host=ip, user="root")
         self.last_read_time = None
         self.q = Queue()
+        self.last_recorded_ts = ""
+        self.reqs_in_last_ts = 0
         
     def read_puts(self):
         for i in range(3):
+            print("------")
             results = self.read()
             self.process_puts(results)
         
     def read(self):
         if self.last_read_time is not None:
-            result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT").stdout
+            result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT", hide=True).stdout
         else:
-            result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT").stdout
-        return [entry for entry in result.split("\n") if "PUT /sdb" in entry]
+            result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT", hide=True).stdout
+        return [entry for entry in result.split("\n") if "PUT /sdb" in entry][:-self.reqs_in_last_ts or None]
             
     def process_puts(self, put_requests):
         for entry in put_requests:
@@ -499,13 +502,23 @@ class LogReader:
             if not object_url.startswith("stock-data"):
                 continue
             object_oid = int(re.split("[.-]", object_url)[2])
+            
             # Object size
             object_size = int(subprocess.check_output(["ls", "-l", f"container-data/{object_url}"], 
                                                 universal_newlines=True, 
                                                 timeout=3, 
                                                 stderr=subprocess.DEVNULL).strip().split()[4])
             response_time = float(request_array[19])
-            print(f"PUT Time: {ts}, Object: {object_url}, Object Size: {object_size}, Time: {response_time}")
+            
+            # Check TS
+            if ts == self.last_recorded_ts:
+                self.reqs_in_last_ts += 1
+            else:
+                self.reqs_in_last_ts = 0
+            
+            # Process/print the request
+            print(f"PUT Time: {ts}, Object: {object_oid}, Object Size: {object_size}, Time: {response_time}")
+            
         self.last_read_time = ts
         
         
