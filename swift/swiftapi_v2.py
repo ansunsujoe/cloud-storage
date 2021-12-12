@@ -96,6 +96,7 @@ class SwiftClient:
             "192.168.1.72": Connection(host="192.168.1.72", user="generic"),
             "192.168.1.73": Connection(host="192.168.1.73", user="generic")
         }
+        self.c = Connection(host="192.168.1.100", user="root", connect_kwargs={"password": "CS6343CC"})
         
         # Open Swift config file
         with open("swiftconfig.json", "r") as f:
@@ -362,9 +363,7 @@ class SwiftClient:
         while True:
             read_oid = 1
             self.req_oids.append(read_oid)
-            p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"],
-                                 stdout=subprocess.DEVNULL)
-            p.wait()
+            self.c.run([f"swift download container-1 container-data-temp/stock-data-{read_oid}.json"], hide=True)
             time.sleep(0.2)
         
     def get_read_req_stats(self):
