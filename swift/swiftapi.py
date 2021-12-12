@@ -466,8 +466,7 @@ class SwiftClient:
         pass
 
     def test(self):
-        print(self.cluster.nodes[0].ip)
-        self.cluster.nodes[0].lr.read(mode="PUT")
+        self.cluster.get_put_requests()
         
 if __name__ == "__main__":
     client = SwiftClient()
