@@ -46,16 +46,24 @@ while True:
         client.get_write_req_stats()
     elif command == "shutdown":
         client.shutdown_nodes()
-    elif command.startswith("remove-node"):
+    elif command.startswith("shutdown-node"):
         client.shut_down_node(command.split()[1])
-    elif command.startswith("add-node"):
+    elif command.startswith("startup-node"):
         client.start_up_node(command.split()[1])
+    elif command.startswith("add-node"):
+        client.add_node_ip(command.split()[1])
+    elif command.startswith("remove-node"):
+        client.remove_node_ip(command.split()[1])
     elif command == "startup":
         client.startup_nodes()
     elif command == "print-ring":
         client.print_cluster_info()
     elif command == "load-balance":
         client.rebalance()
+    elif command == "lb-stats":
+        client.get_load_balancing_stats()
+    elif command == "lb-details":
+        client.get_load_balancing_details()
     elif command == "test":
         client.test()
     elif command == "":
