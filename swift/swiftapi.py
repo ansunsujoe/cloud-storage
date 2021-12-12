@@ -520,7 +520,7 @@ class LogReader:
             # Process/print the request
             print(f"PUT Time: {ts}, Object: {object_oid}, Object Size: {object_size}, Time: {response_time}")
             
-        self.last_read_time = ts
+        self.last_read_time = self.last_recorded_ts
         
         
 class StorageNode:
