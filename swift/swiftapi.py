@@ -362,6 +362,7 @@ class SwiftClient:
     def read_req_process(self):
         t1 = threading.Thread(target=self.generate_read_req)
         t2 = threading.Thread(target=self.get_read_req_stats)
+        t2.daemon = True
         try:
             t1.start()
             t2.start()
