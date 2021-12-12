@@ -16,10 +16,10 @@ from queue import Queue
 vm_mapping = {
     "192.168.1.99": "192.168.1.71",
     "192.168.1.98": "192.168.1.71",
-    "192.168.1.97": "192.168.1.72",
-    "192.168.1.96": "192.168.1.72",
+    #"192.168.1.97": "192.168.1.72",
+    #"192.168.1.96": "192.168.1.72",
     "192.168.1.95": "192.168.1.73",
-    "192.168.1.94": "192.168.1.73"
+    #"192.168.1.94": "192.168.1.73"
 }
 
 vm_numbers = {
@@ -148,27 +148,27 @@ class SwiftClient:
         account_replicas = self.ring_conf.get("account").get("replicas")
         account_ips = self.ring_conf.get("account").get("hosts")
         subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "create", "10", str(account_replicas), "0"])
-        for i in range(len(account_ips)):
+        for i, e in enumerate(vm_mapping.keys()):
             subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "add", "--region", "10", "--zone", f"{i+1}",
-                            "--ip", account_ips[i], "--port", "6202", "--device", "sdb", "--weight", "100"])
+                            "--ip", e, "--port", "6202", "--device", "sdb", "--weight", "100"])
         subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "rebalance"])
         
         # Container builder
         container_replicas = self.ring_conf.get("container").get("replicas")
         container_ips = self.ring_conf.get("container").get("hosts")
         subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "create", "10", str(container_replicas), "0"])
-        for i in range(len(container_ips)):
+        for i, e in enumerate(vm_mapping.keys()):
             subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "add", "--region", "10", "--zone", f"{i+1}",
-                            "--ip", container_ips[i], "--port", "6201", "--device", "sdb", "--weight", "100"])
+                            "--ip", e, "--port", "6201", "--device", "sdb", "--weight", "100"])
         subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "rebalance"])
         
         # Object builder
         object_replicas = self.ring_conf.get("object").get("replicas")
         object_ips = self.ring_conf.get("object").get("hosts")
         subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "create", "10", str(object_replicas), "0"])
-        for i in range(len(object_ips)):
+        for i, e in enumerate(vm_mapping.keys()):
             subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "add", "--region", "10", "--zone", f"{i+1}",
-                            "--ip", object_ips[i], "--port", "6200", "--device", "sdb", "--weight", "100"])
+                            "--ip", e, "--port", "6200", "--device", "sdb", "--weight", "100"])
         subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
         
         # Move gz files to correct place
