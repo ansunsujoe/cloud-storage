@@ -417,7 +417,7 @@ class SwiftClient:
                                    stdout=subprocess.DEVNULL)
 
     def clear_data(self):
-        subprocess.run(["swift", "delete", "-a"])
+        subprocess.run(["swift", "delete", "-a"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         print("Data Cleared!")
         
     def force_clear_data(self):
@@ -484,7 +484,6 @@ class LogReader:
         empty_requests = 0
         req_received = False
         while True:
-            print("--------")
             results = self.read()
             if not results and req_received:
                 empty_requests += 1
@@ -503,8 +502,6 @@ class LogReader:
             try:
                 result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT", hide=True).stdout
             except Exception:
-                print("Bleh")
-                print(self.last_read_time)
                 return []
         else:
             result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT", hide=True).stdout
