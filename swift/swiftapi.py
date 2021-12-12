@@ -108,6 +108,11 @@ class SwiftClient:
         self.cluster = StorageCluster()
         for ip in self.ring_conf.get("storage_nodes"):
             result = self.cluster_c[vm_mapping[ip]].sudo("virsh list --all").stdout
+            x = result.split("\n")
+            print(x[0])
+            print(x[1])
+            print(x[2])
+            
             node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
             for name in node_names:
                 print(name)
