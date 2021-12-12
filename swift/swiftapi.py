@@ -81,7 +81,7 @@ class SwiftClient:
             
         # Create the storage nodes and cluster objects
         self.cluster = StorageCluster()
-        for ip in self.vm_names.get("storage_nodes"):
+        for ip in self.ring_conf.get("storage_nodes"):
             self.cluster.add(StorageNode(ip, 100, "running"))
             
         # Set up Swift Credentials
