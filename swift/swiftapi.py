@@ -483,7 +483,7 @@ if __name__ == "__main__":
 class LogReader:
     def __init__(self, ip):
         self.ip = ip
-        self.c = Connection(host=ip, user="root")
+        self.c = Connection(host=ip, user="root", connect_timeout=3)
         self.last_read_time = None
         self.last_recorded_ts = ""
         self.reqs_in_last_ts = 0
