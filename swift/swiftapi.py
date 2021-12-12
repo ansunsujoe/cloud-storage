@@ -146,38 +146,37 @@ class SwiftClient:
         # Account builder
         account_replicas = self.ring_conf.get("account").get("replicas")
         account_ips = self.ring_conf.get("account").get("hosts")
-        subprocess.run(["swift-ring-builder", "account.builder", "create", "2", str(account_replicas), "0"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "create", "2", str(account_replicas), "0"])
         for i in range(len(account_ips)):
-            subprocess.run(["swift-ring-builder", "account.builder", "add", "--region", "1", "--zone", "1",
+            subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "add", "--region", "1", "--zone", "1",
                             "--ip", account_ips[i], "--port", "6202", "--device", "sdb", "--weight", "100"])
-        subprocess.run(["swift-ring-builder", "account.builder", "rebalance"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "rebalance"])
         
         # Container builder
         container_replicas = self.ring_conf.get("container").get("replicas")
         container_ips = self.ring_conf.get("container").get("hosts")
-        subprocess.run(["swift-ring-builder", "container.builder", "create", "2", str(container_replicas), "0"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "create", "2", str(container_replicas), "0"])
         for i in range(len(container_ips)):
-            subprocess.run(["swift-ring-builder", "container.builder", "add", "--region", "1", "--zone", "1",
+            subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "add", "--region", "1", "--zone", "1",
                             "--ip", container_ips[i], "--port", "6201", "--device", "sdb", "--weight", "100"])
-        subprocess.run(["swift-ring-builder", "container.builder", "rebalance"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "rebalance"])
         
         # Object builder
         object_replicas = self.ring_conf.get("object").get("replicas")
         object_ips = self.ring_conf.get("object").get("hosts")
-        subprocess.run(["swift-ring-builder", "object.builder", "create", "2", str(object_replicas), "0"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "create", "2", str(object_replicas), "0"])
         for i in range(len(object_ips)):
-            subprocess.run(["swift-ring-builder", "object.builder", "add", "--region", "1", "--zone", "1",
+            subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "add", "--region", "1", "--zone", "1",
                             "--ip", object_ips[i], "--port", "6200", "--device", "sdb", "--weight", "100"])
-        subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
         
         # Move gz files to correct place
         for ip in account_ips:
-            subprocess.run(["scp", "account.ring.gz", f"root@{ip}:/etc/swift"])
+            subprocess.run(["scp", "/etc/swift/account.ring.gz", f"root@{ip}:/etc/swift"])
         for ip in container_ips:
-            subprocess.run(["scp", "container.ring.gz", f"root@{ip}:/etc/swift"])
+            subprocess.run(["scp", "/etc/swift/container.ring.gz", f"root@{ip}:/etc/swift"])
         for ip in object_ips:
-            subprocess.run(["scp", "object.ring.gz", f"root@{ip}:/etc/swift"])
-        subprocess.run(["cp", "account.ring.gz", "container.ring.gz", "object.ring.gz", "/etc/swift"])
+            subprocess.run(["scp", "/etc/swift/object.ring.gz", f"root@{ip}:/etc/swift"])
         
     def as_timestamp(self, ts):
         dt = datetime.now()
@@ -444,6 +443,12 @@ class SwiftClient:
                 if name in self.vm_names.get("swift"):
                     subprocess.run(["./stats.sh", "virsh-shutdown", ip, name],
                                    stdout=subprocess.DEVNULL)
+                    
+    def start_up_node(self, ip):
+        self.cluster.start_up_node(ip)
+    
+    def shut_down_node(self, ip):
+        self.cluster.shut_down_node(ip)
     
     def startup_nodes(self):
         for ip in self.vm_names.get("cluster_nodes"):
@@ -628,7 +633,7 @@ class StorageNode:
     
     def set_weight(self, weight):
         self.weight = weight
-        subprocess.run(["swift-ring-builder", "object.builder", "set_weight", self.ip, weight])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "set_weight", self.ip, weight])
         
 class StorageCluster:
     def __init__(self):
@@ -652,6 +657,11 @@ class StorageCluster:
         for node in self.nodes:
             if node.ip == ip:
                 self.cluster_c[vm_mapping[ip]].sudo(f"virsh shutdown {node.name}")
+                
+    def start_up_node(self, ip):
+        for node in self.nodes:
+            if node.ip == ip:
+                self.cluster_c[vm_mapping[ip]].sudo(f"virsh start {node.name}")
     
     def restart_stuff(self, num_nodes):
         pass
@@ -710,16 +720,15 @@ class StorageCluster:
                 node.set_weight(weight)
                 
     def rebalance(self):
-        subprocess.run(["swift-ring-builder", "object.builder", "write_ring"])
-        subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
-        subprocess.run(["cp", "object.ring.gz", "/etc/swift"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "write_ring"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
         self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         for ip in [node.ip for node in self.nodes]:
             try:
                 subprocess.run(["scp", "/etc/swift/object.ring.gz", f"root@{ip}:/etc/swift"], timeout=3)
             except Exception:
                 pass
-        subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
     
     def __repr__(self):
         # Stats logging
