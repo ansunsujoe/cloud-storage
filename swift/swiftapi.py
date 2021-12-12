@@ -546,6 +546,7 @@ class StorageCluster:
         t = PrettyTable(["IP", "Weight", "Status"])
         for node in self.nodes:
             t.add_row([node.ip, node.weight, node.status])
+        return str(t)
                 
 class PutRequest:
     def __init__(self, ts, oid, size, response_time):
