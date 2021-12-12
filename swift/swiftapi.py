@@ -463,6 +463,7 @@ class SwiftClient:
         pass
 
     def test(self):
+        print(self.cluster.nodes[0].ip)
         self.cluster.nodes[0].lr.read_puts()
         
 if __name__ == "__main__":
