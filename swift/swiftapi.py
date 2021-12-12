@@ -177,6 +177,8 @@ class SwiftClient:
     def add_data(self, n):
         self.start_object_num = self.cur_object_num
         self.end_object_num = self.cur_object_num + n
+        self.cluster.start_obj = self.start_object_num
+        self.cluster.end_obj = self.end_object_num
         
         # Container path
         fp = Path(f"container-data-temp")
@@ -380,7 +382,7 @@ class SwiftClient:
             # object_url = request_array[9].split("/")[-1]
             response_time = float(request_array[20])
             response_times.append(response_time)
-            print(f"GET Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
+            print(f"PUT Request {i+1} - Response Time: {round(response_time, 3)}s, Moving Average: {round(moving_average(response_times, 5), 3)}s")
            
     def get_data_movement_logs(self):
         with open(self.log_fp, "r") as f:
@@ -464,9 +466,14 @@ class SwiftClient:
         
     def rebalance(self):
         self.cluster.rebalance()
+        
+    def get_movement(self):
+        self.cluster.get_put_requests()
+        self.cluster.process_put_queue()
 
     def test(self):
         self.cluster.get_put_requests()
+        self.cluster.process_put_queue()
         
 if __name__ == "__main__":
     client = SwiftClient()
@@ -475,12 +482,13 @@ if __name__ == "__main__":
     
 class LogReader:
     def __init__(self, ip):
+        self.ip = ip
         self.c = Connection(host=ip, user="root")
         self.last_read_time = None
         self.last_recorded_ts = ""
         self.reqs_in_last_ts = 0
         
-    def read(self, mode):
+    def read(self, mode, q):
         patience = 10
         empty_requests = 0
         req_received = False
@@ -500,9 +508,9 @@ class LogReader:
                 req_received = True
                 empty_requests = 0
             if mode == "PUT":
-                self.process_puts(results)
+                self.process_puts(results, q)
             else:
-                self.process_gets(results)
+                self.process_gets(results, q)
         
     def read_puts(self):
         if self.last_read_time is not None:
@@ -523,8 +531,9 @@ class LogReader:
         else:
             result = self.c.run(f"journalctl -u openstack-swift-proxy | grep GET", hide=True).stdout
         return [entry for entry in result.split("\n") if "GET /v1" in entry][:-self.reqs_in_last_ts or None]
+
             
-    def process_puts(self, put_requests):
+    def process_puts(self, put_requests, q):
         for entry in put_requests:
             request_array = entry.split()
             ts = request_array[2]
@@ -548,7 +557,8 @@ class LogReader:
                 self.last_recorded_ts = ts
             
             # Process/print the request
-            print(f"PUT Time: {ts}, Object: {object_oid}, Object Size: {object_size}, Time: {response_time}")
+            print(f"PUT Time: {ts}, Host: {self.ip}, Object: {object_oid}, Object Size: {object_size}, Time: {response_time}")
+            q.put(PutRequest(ts, object_oid, object_size, response_time))
         
         if self.last_recorded_ts != "":
             self.last_read_time = self.last_recorded_ts
@@ -594,14 +604,48 @@ class StorageCluster:
         for node in self.nodes:
             node.lr.last_read_time = t
             
+    def as_timestamp(self, ts):
+        dt = datetime.now()
+        time_array = ts.split(":")
+        return datetime(dt.year, dt.month, dt.day, int(time_array[0]), int(time_array[1]), int(time_array[2]))
+            
     def get_put_requests(self):
         threads = []
         for node in self.nodes:
-            threads.append(threading.Thread(target=node.lr.read, args=("PUT",)))
+            threads.append(threading.Thread(target=node.lr.read, args=("PUT", self.q)))
         for t in threads:
             t.start()
         for t in threads:
             t.join()
+            
+    def process_put_queue(self):
+        total_bytes = 0.0
+        total_requests = 0
+        total_response_time = 0.0
+        last_ts = None
+        while not self.q.empty():
+            req = self.q.get()
+            total_bytes += req.size
+            total_requests += 1
+            total_response_time += req.response_time
+            if last_ts is None or self.as_timestamp(req.ts) > self.as_timestamp(last_ts):
+                last_ts = req.ts
+            
+        # Calculate high level stats
+        if last_ts is not None:
+            end_time = self.as_timestamp(last_ts)
+            start_time = datetime.strptime(self.last_read_time, "%Y-%m-%d %H:%M:%S")
+            delta_sec = (end_time - start_time).total_seconds()
+            
+            # Metrics
+            print(f"Total Requests Made: {total_requests} requests")
+            print(f"Time Elapsed: {delta_sec} seconds")
+            print(f"Total Data Size: {total_bytes / 1024.0} KB")
+            print(f"Speed: {round(total_bytes / 1024.0 / delta_sec, 3)} KB/s")
+            print(f"Average Response Time: {round(total_response_time / total_requests, 3)} s")
+        else:
+            print("Nothing to report about.")
+            
             
     def set_weight(self, ip, weight):
         for node in self.nodes:

@@ -32,6 +32,8 @@ while True:
         client.set_weight(arr[1], arr[2])
     elif command == "data-movement":
         client.get_data_movement_stats_v2()
+    elif command == "movement":
+        client.get_movement()
     elif command == "data-movement-logs":
         client.get_data_movement_logs()
     elif command == "read-req":
