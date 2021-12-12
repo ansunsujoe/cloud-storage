@@ -459,8 +459,8 @@ class SwiftClient:
     def print_cluster_info(self):
         print(self.cluster)
         
-    def set_weight(self):
-        pass
+    def set_weight(self, ip, weight):
+        self.cluster.set_weight(ip, weight)
 
     def test(self):
         self.cluster.get_put_requests()
@@ -566,6 +566,10 @@ class StorageNode:
     
     def shutdown(self):
         pass
+    
+    def set_weight(self, weight):
+        self.weight = weight
+        subprocess.run(["swift-ring-builder", "object.builder", "set_weight", self.ip, weight])
         
 class StorageCluster:
     def __init__(self):
@@ -595,6 +599,12 @@ class StorageCluster:
             t.start()
         for t in threads:
             t.join()
+            
+    def set_weight(self, ip, weight):
+        for node in self.nodes:
+            if node.ip == ip:
+                self.last_read_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                node.set_weight(weight)
     
     def __repr__(self):
         # Stats logging

@@ -27,6 +27,9 @@ while True:
         client.add_data(int(command.split()[1]))
     elif command.startswith("generate-data"):
         client.add_data_container(int(command.split()[1]))
+    elif command.startswith("set-weight"):
+        arr = command.split()
+        client.set_weight(arr[1], arr[2])
     elif command == "data-movement":
         client.get_data_movement_stats_v2()
     elif command == "data-movement-logs":
