@@ -22,6 +22,15 @@ vm_mapping = {
     "192.168.1.94": "192.168.1.73"
 }
 
+vm_numbers = {
+    "192.168.1.99": 1,
+    "192.168.1.98": 2,
+    "192.168.1.97": 3,
+    "192.168.1.96": 4,
+    "192.168.1.95": 5,
+    "192.168.1.94": 6
+}
+
 def moving_average(array, interval):
     if len(array) < interval:
         return sum(array) / len(array)
@@ -98,7 +107,10 @@ class SwiftClient:
         # Create the storage nodes and cluster objects
         self.cluster = StorageCluster()
         for ip in self.ring_conf.get("storage_nodes"):
-            print(self.cluster_c[vm_mapping[ip]].sudo("virsh list --all").stdout)
+            result = self.cluster_c[vm_mapping[ip]].sudo("virsh list --all").stdout
+            node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
+            for name in node_names:
+                print(name)
             self.cluster.add(StorageNode(ip, 100, "running"))
             
         # # Set up Swift Credentials
