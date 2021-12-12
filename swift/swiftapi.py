@@ -712,6 +712,7 @@ class StorageCluster:
                 node.set_weight(weight)
                 
     def rebalance(self):
+        subprocess.run(["swift-ring-builder", "object.builder", "write_ring"])
         subprocess.run(["swift-ring-builder", "object.builder", "rebalance"])
         self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         for ip in [node.ip for node in self.nodes]:
