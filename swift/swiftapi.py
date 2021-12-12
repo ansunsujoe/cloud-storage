@@ -591,10 +591,10 @@ class StorageCluster:
         threads = []
         for node in self.nodes:
             threads.append(threading.Thread(target=node.lr.read, args=("PUT",)))
-            for t in threads:
-                t.start()
-            for t in threads:
-                t.join()
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
     
     def __repr__(self):
         # Stats logging
