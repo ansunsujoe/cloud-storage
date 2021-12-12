@@ -113,9 +113,9 @@ class SwiftClient:
             print(x[1])
             print(x[2])
             
-            node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
-            for name in node_names:
-                print(name)
+            # node_names = [entry.split()[1] for entry in result.split("\n")[2:]]
+            # for name in node_names:
+            #     print(name)
             self.cluster.add(StorageNode(ip, 100, "running"))
             
         # # Set up Swift Credentials
