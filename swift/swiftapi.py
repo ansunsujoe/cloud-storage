@@ -146,7 +146,7 @@ class SwiftClient:
         # Account builder
         account_replicas = self.ring_conf.get("account").get("replicas")
         account_ips = self.ring_conf.get("account").get("hosts")
-        subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "create", "2", str(account_replicas), "0"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "create", "18", str(account_replicas), "0"])
         for i in range(len(account_ips)):
             subprocess.run(["swift-ring-builder", "/etc/swift/account.builder", "add", "--region", "1", "--zone", f"{i+1}",
                             "--ip", account_ips[i], "--port", "6202", "--device", "sdb", "--weight", "100"])
@@ -155,7 +155,7 @@ class SwiftClient:
         # Container builder
         container_replicas = self.ring_conf.get("container").get("replicas")
         container_ips = self.ring_conf.get("container").get("hosts")
-        subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "create", "2", str(container_replicas), "0"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "create", "18", str(container_replicas), "0"])
         for i in range(len(container_ips)):
             subprocess.run(["swift-ring-builder", "/etc/swift/container.builder", "add", "--region", "1", "--zone", f"{i+1}",
                             "--ip", container_ips[i], "--port", "6201", "--device", "sdb", "--weight", "100"])
@@ -164,7 +164,7 @@ class SwiftClient:
         # Object builder
         object_replicas = self.ring_conf.get("object").get("replicas")
         object_ips = self.ring_conf.get("object").get("hosts")
-        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "create", "2", str(object_replicas), "0"])
+        subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "create", "18", str(object_replicas), "0"])
         for i in range(len(object_ips)):
             subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "add", "--region", "1", "--zone", f"{i+1}",
                             "--ip", object_ips[i], "--port", "6200", "--device", "sdb", "--weight", "100"])
