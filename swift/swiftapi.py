@@ -722,6 +722,7 @@ class StorageCluster:
     def rebalance(self):
         subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "write_ring"])
         subprocess.run(["swift-ring-builder", "/etc/swift/object.builder", "rebalance"])
+        subprocess.run(["systemctl", "restart", "openstack-swift-proxy.service"])
         self.set_event_time(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         for ip in [node.ip for node in self.nodes]:
             try:
