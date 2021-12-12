@@ -194,7 +194,7 @@ class SwiftClient:
         self.cur_object_num += n
         
         # Upload info into container
-        subprocess.Popen(["./data-actions.sh", "add"], stdout=subprocess.DEVNULL)
+        subprocess.Popen(["./data-actions.sh", "add"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
     def get_data_movement_stats(self):
         # Collect logs since an event
@@ -503,6 +503,8 @@ class LogReader:
             try:
                 result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT", hide=True).stdout
             except Exception:
+                print("Bleh")
+                print(self.last_read_time)
                 return []
         else:
             result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT", hide=True).stdout
