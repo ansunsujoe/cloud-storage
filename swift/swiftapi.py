@@ -380,7 +380,7 @@ class SwiftClient:
             p = subprocess.Popen(["swift", "download", "container-1", f"container-data-temp/stock-data-{read_oid}.json"],
                                  stdout=subprocess.DEVNULL)
             p.wait()
-            time.sleep(0.2)
+            time.sleep(0.01)
         
     def get_read_req_stats(self):
         while True:
@@ -391,6 +391,7 @@ class SwiftClient:
             get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
             response_times = []
             # Requests
+            print("----------")
             last_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for i, entry in enumerate(get_requests):
                 request_array = entry.split()
