@@ -12,6 +12,9 @@ import os
 from fabric import Connection
 import threading
 from queue import Queue
+import signal
+
+signal.signal(signal.SIGINT, signal.default_int_handler)
 
 def moving_average(array, interval):
     if len(array) < interval:
@@ -464,7 +467,7 @@ class SwiftClient:
 
     def test(self):
         print(self.cluster.nodes[0].ip)
-        self.cluster.nodes[0].lr.read_puts()
+        self.cluster.nodes[0].lr.read(mode="PUT")
         
 if __name__ == "__main__":
     client = SwiftClient()
@@ -475,16 +478,18 @@ class LogReader:
     def __init__(self, ip):
         self.c = Connection(host=ip, user="root")
         self.last_read_time = None
-        self.q = Queue()
         self.last_recorded_ts = ""
         self.reqs_in_last_ts = 0
         
-    def read_puts(self):
+    def read(self, mode):
         patience = 10
         empty_requests = 0
         req_received = False
         while True:
-            results = self.read()
+            if mode == "PUT":
+                results = self.read_puts()
+            else:
+                results = self.read_gets()
             if not results and req_received:
                 empty_requests += 1
                 time.sleep(1)
@@ -495,9 +500,12 @@ class LogReader:
             elif results:
                 req_received = True
                 empty_requests = 0
-            self.process_puts(results)
+            if mode == "PUT":
+                self.process_puts(results)
+            else:
+                self.process_gets(results)
         
-    def read(self):
+    def read_puts(self):
         if self.last_read_time is not None:
             try:
                 result = self.c.run(f"journalctl -u openstack-swift-object --since '{self.last_read_time}' | grep PUT", hide=True).stdout
@@ -506,6 +514,16 @@ class LogReader:
         else:
             result = self.c.run(f"journalctl -u openstack-swift-object | grep PUT", hide=True).stdout
         return [entry for entry in result.split("\n") if "PUT /sdb" in entry][:-self.reqs_in_last_ts or None]
+    
+    def read_gets(self):
+        if self.last_read_time is not None:
+            try:
+                result = self.c.run(f"journalctl -u openstack-swift-proxy --since '{self.last_read_time}' | grep GET", hide=True).stdout
+            except Exception:
+                return []
+        else:
+            result = self.c.run(f"journalctl -u openstack-swift-proxy | grep GET", hide=True).stdout
+        return [entry for entry in result.split("\n") if "GET /v1" in entry][:-self.reqs_in_last_ts or None]
             
     def process_puts(self, put_requests):
         for entry in put_requests:
@@ -535,6 +553,9 @@ class LogReader:
         
         if self.last_recorded_ts != "":
             self.last_read_time = self.last_recorded_ts
+            
+    def process_gets(self):
+        pass
         
         
 class StorageNode:
@@ -554,6 +575,7 @@ class StorageCluster:
     def __init__(self):
         self.nodes = []
         self.last_read_time = None
+        self.q = Queue()
         
     def add(self, node):
         self.nodes.append(node)
@@ -568,6 +590,17 @@ class StorageCluster:
         self.last_read_time = t
         for node in self.nodes:
             node.lr.last_read_time = t
+            
+    def get_put_requests(self):
+        threads = []
+        for node in self.nodes:
+            threads.append(threading.Thread(target=node.lr.read, args=("PUT",)))
+        try:
+            for t in threads:
+                t.start()
+        except KeyboardInterrupt:
+            for t in threads:
+                t.join()
     
     def __repr__(self):
         # Stats logging
