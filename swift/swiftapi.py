@@ -383,13 +383,13 @@ class SwiftClient:
             time.sleep(0.01)
         
     def get_read_req_stats(self):
+        response_times = []
         while True:
             result = subprocess.check_output(["journalctl", "-u", "openstack-swift-proxy", "--since", self.last_read_time], 
                                                     universal_newlines=True, 
                                                     timeout=3, 
                                                     stderr=subprocess.DEVNULL).strip()
             get_requests = [entry for entry in result.split("\n") if "GET /v1" in entry and "stock-data" in entry]
-            response_times = []
             # Requests
             print("----------")
             last_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
